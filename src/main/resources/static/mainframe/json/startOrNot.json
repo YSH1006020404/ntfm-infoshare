@@ -1,0 +1,12 @@
+[
+  {
+    "id": "false",
+    "value": "false",
+    "text": "关闭"
+  },
+  {
+    "id": "true",
+    "value": "true",
+    "text": "开启"
+  }
+]

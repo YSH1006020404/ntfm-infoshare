@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:include="include :: header"></head>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        html, body {
+            margin: 0px;
+            padding: 0px;
+            color: #e5e5e5;
+            background: #252727;
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        tr {
+            height: 45px;
+        }
+
+        legend {
+            color: #d0d0cd;
+        }
+
+        fieldset, .mini-datagrid {
+            margin-left: 1%;
+            margin-right: 1%;
+            margin-top: 1%;
+            border: solid 1px #3e4140;
+            position: relative;
+        }
+
+        .mini-textbox, .mini-buttonedit {
+            width: 97%;
+        }
+    </style>
+</head>
+<body>
+<div id="form1">
+    <input name="infoshareConfig.id" class="mini-hidden"/>
+    <input name="infoshareConfig.sourceType" class="mini-hidden"/>
+    <fieldset>
+        <legend>基础信息配置</legend>
+        <input name="dataBaseConfig.id" class="mini-hidden"/>
+        <input name="dataBaseConfig.xmlformatconfigId" class="mini-hidden"/>
+        <input name="dataBaseConfig.tableName" class="mini-hidden"/>
+        <table class="dataBase" border="0" cellpadding="1" cellspacing="2">
+            <tr>
+                <td class="labelName">全量发送频率：</td>
+                <td class="labelInput">
+                    <input class="mini-combobox" name="dataBaseConfig.allFrequency" valueFiled="value"
+                           url="/mainframe/json/cronExpressions.json" allowinput="true" ondrawcell="onDrawCell"/>
+                </td>
+                <td class="labelName">增量发送频率：</td>
+                <td class="labelInput">
+                    <input class="mini-combobox" name="dataBaseConfig.incFrequency" valueFiled="value"
+                           url="/mainframe/json/cronExpressions.json" allowinput="true" ondrawcell="onDrawCell"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="labelName">是否发送心跳：</td>
+                <td class="labelInput">
+                    <input name="dataBaseConfig.beatFlag" class="mini-combobox" url="/mainframe/json/isOrNo.json"
+                           required="true"/>
+                </td>
+                <td class="labelName">是否去重：</td>
+                <td class="labelInput">
+                    <input name="dataBaseConfig.deduplicationFlag" class="mini-combobox"
+                           url="/mainframe/json/isOrNo.json" required="true"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="labelName">XML模板：</td>
+                <td class="labelInput">
+                    <input id="selectXmlTemplate" class="mini-combobox" name="dataBaseConfig.xmltemplateId"
+                           showNullItem="false" url="/infoshareConf/xmlTemplate/queryXMLName" required="true"/>
+                </td>
+                <td class="labelName">XML最大数据量：</td>
+                <td class="labelInput">
+                    <input class="mini-spinner" name="dataBaseConfig.splitNum" minValue="1" maxValue="10000"
+                           required="true"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="labelName">基础表：</td>
+                <td class="labelInput">
+                    <input id="baseTable" class="mini-combobox" name="dataBaseConfig.tableId" showNullItem="false"
+                           url="/infoshareConf/common/listOutputTable" required="true"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="labelName">筛选条件：</td>
+                <td class="labelInput" colspan="3">
+                    <input style="width: 99%;" class="mini-textbox" name="dataBaseConfig.condition"/>
+                </td>
+            </tr>
+        </table>
+    </fieldset>
+    <fieldset>
+        <legend>关联表配置</legend>
+        <input name="dataBaseRelation.id" class="mini-hidden"/>
+        <input name="dataBaseRelation.tableName" class="mini-hidden"/>
+        <table class="dataBaseRelation" border="0" cellpadding="1" cellspacing="2">
+            <tr>
+                <td class="labelName">关联表：</td>
+                <td class="labelInput">
+                    <input id="relationTable" class="mini-combobox" name="dataBaseRelation.tableId"
+                           showNullItem="false" url="/infoshareConf/common/listOutputTable"/>
+                </td>
+                <td class="labelName"/>
+                <td class="labelInput"/>
+            </tr>
+            <tr>
+                <td class="labelName">基础表关联字段：</td>
+                <td class="labelInput">
+                    <input name="dataBaseRelation.baseTableColumn" class="mini-combobox" allowInput="true"/>
+                </td>
+                <td class="labelName">关联表关联字段：</td>
+                <td class="labelInput">
+                    <input name="dataBaseRelation.relationTableColumn" class="mini-combobox" allowInput="true"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="labelName">筛选条件：</td>
+                <td class="labelInput" colspan="3">
+                    <input style="width: 99%;" class="mini-textbox" name="dataBaseRelation.condition"/>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <a class="mini-button" id="addDatabaseRelation">添加</a>
+                    <a class="mini-button" id="updateDatabaseRelation">修改</a>
+                    <a class="mini-button" id="cleanDatabaseRelation">清空</a>
+                </td>
+            </tr>
+        </table>
+    </fieldset>
+    <br/>
+    <div id="databaseRelationList" class="mini-datagrid" idField="id" showPager="false" style="width: 98%;">
+        <div property="columns">
+            <div name="operation" width="5%" align="center" renderer="onActionRenderer" headerAlign="center">操作
+            </div>
+            <div field="tableName" width="15%" align="center" headerAlign="center">关联表</div>
+            <div field="baseTableColumn" width="15%" align="center" headerAlign="center">基础表关联字段</div>
+            <div field="relationTableColumn" width="15%" align="center" headerAlign="center">关联表关联字段</div>
+            <div field="condition" align="center" headerAlign="center">筛选条件
+                <input property="editor" style="width: 99%;" class="mini-textbox"/>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="text-align: center;padding:10px;">
+    <a class="mini-button" style="margin-right: 10%;" id="savaData">确定</a>
+    <a class="mini-button" id="onCancel">取消</a>
+</div>
+
+<script>
+    "use strict";
+    mini.parse();
+    //   ================================== 变量定义=================================
+    //链路ID
+    var infoshareId = null;
+    //表单值
+    var form = new mini.Form("form1");
+    //操作状态
+    var curAction = "new";
+    //关联表Grid
+    var databaseRelationGrid = mini.get("databaseRelationList");
+    //关联表选择行
+    var selectRow;
+    //XML模板
+    var xmlTemplateIdOld;
+    //基础表
+    var baseTableIdOld;
+
+    //   ==================================== 函数定义区=============================
+
+    /**
+     *父页面调用子页面的setData函数
+     */
+    function SetData(action, linkId) {
+        curAction = action;
+        infoshareId = linkId;
+        mini.getbyName("infoshareConfig.id").setValue(linkId);
+        $.callJson({
+            url: '/infoshareConf/dataSourceConfig/getDataByInfoshareId',
+            data: {infoshareId: linkId},
+            success: function (data) {
+                if (action == "new") {
+                    //设置数据接收方式（默认为数据库方式）
+                    $.callJson({
+                        url: '/infoshareConf/dataSourceConfig/getDefaultSourceType',
+                        async: false,
+                        success: function (data) {
+                            mini.getByName("infoshareConfig.sourceType").setValue(data.id);
+                        },
+                        error: function (e) {
+                            mini.alert("设置默认数据接收方式（数据库）失败！");
+                        }
+                    });
+                    //设置是否发送心跳默认值
+                    mini.getbyName("dataBaseConfig.beatFlag").select(1);
+                    //设置是否去重默认值
+                    mini.getbyName("dataBaseConfig.deduplicationFlag").select(0);
+                } else {
+                    form.setData(data);
+                    databaseRelationGrid.setData(data.dataBaseRelationList);
+                    xmlTemplateIdOld = data.dataBaseConfig.xmltemplateId;
+                    baseTableIdOld = data.dataBaseConfig.tableId;
+                    //初始化基础表关联字段
+                    getTableColumns(data.dataBaseConfig.tableId, mini.getbyName("dataBaseRelation.baseTableColumn"));
+                }
+            },
+            error: function (e) {
+                mini.alert("页面初始化失败！");
+            }
+        });
+    }
+
+    /**
+     * 添加关联表
+     */
+    function addDatabaseRelation() {
+        //关联表配置校验
+        if (!validateDatabaseRelation()) {
+            return;
+        }
+        var databaseRelationJson = {
+            id: "",
+            //关联表
+            tableId: mini.getbyName("dataBaseRelation.tableId").getSelected().id,
+            tableName: mini.getbyName("dataBaseRelation.tableId").getSelected().tableName,
+            //基础表关联字段
+            baseTableColumn: mini.getbyName("dataBaseRelation.baseTableColumn").getValue(),
+            //关联表关联字段
+            relationTableColumn: mini.getbyName("dataBaseRelation.relationTableColumn").getValue(),
+            //筛选条件
+            condition: mini.getbyName("dataBaseRelation.condition").getValue()
+        };
+        databaseRelationGrid.addRow(databaseRelationJson, 0);
+    }
+
+    /**
+     * 修改关联表
+     */
+    function updateDatabaseRelation() {
+        //关联表配置校验
+        if (!validateDatabaseRelation()) {
+            return;
+        }
+        var databaseRelationJson = {
+            id: mini.getbyName("dataBaseRelation.id").getValue(),
+            //关联表
+            tableId: mini.getbyName("dataBaseRelation.tableId").getSelected().id,
+            tableName: mini.getbyName("dataBaseRelation.tableId").getSelected().tableName,
+            //基础表关联字段
+            baseTableColumn: mini.getbyName("dataBaseRelation.baseTableColumn").getValue(),
+            //关联表关联字段
+            relationTableColumn: mini.getbyName("dataBaseRelation.relationTableColumn").getValue(),
+            //筛选条件
+            condition: mini.getbyName("dataBaseRelation.condition").getValue()
+        };
+        if (selectRow == null || selectRow == "") {
+            mini.alert("请选择关联表再修改！");
+        }
+        databaseRelationGrid.updateRow(selectRow, databaseRelationJson);
+    }
+
+    /**
+     * 清空关联表
+     */
+    function cleanDatabaseRelation() {
+        mini.getbyName("dataBaseRelation.tableId").setValue("");
+        mini.getbyName("dataBaseRelation.baseTableColumn").setValue("");
+        mini.getbyName("dataBaseRelation.relationTableColumn").setValue("");
+        mini.getbyName("dataBaseRelation.condition").setValue("");
+    }
+
+    /**
+     * 关联表配置校验
+     */
+    function validateDatabaseRelation() {
+        var selected = mini.getbyName("dataBaseRelation.tableId").getSelected();
+        if (selected == null || selected == "") {
+            mini.alert("请选择关联表再添加！");
+            return false;
+        }
+        var baseTableColumn = mini.getbyName("dataBaseRelation.baseTableColumn").getValue();
+        if (baseTableColumn == "") {
+            mini.alert("请选择基础表关联字段再添加！");
+            return false;
+        }
+        var relationTableColumn = mini.getbyName("dataBaseRelation.relationTableColumn").getValue();
+        if (relationTableColumn == "") {
+            mini.alert("请选择关联表关联字段再添加！");
+            return false;
+        }
+        if (!mini.getbyName("dataBaseRelation.baseTableColumn").validate()) {
+            return false;
+        }
+        if (!mini.getbyName("dataBaseRelation.relationTableColumn").validate()) {
+            return false;
+        }
+        if (!mini.getbyName("dataBaseRelation.condition").validate()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 删除关联表
+     */
+    function onActionRenderer(e) {
+        var uid = e.record._uid;
+        var s = '<a class="mini-button" href="javascript:removeRow(' + uid + ')"><span class="mini-button-text">删除</span></a>';
+        return s;
+    }
+
+    function removeRow(uid) {
+        var row = databaseRelationGrid.getRowByUID(uid);
+        databaseRelationGrid.removeRow(row, false);
+    }
+
+    /**
+     * 数据保存
+     */
+    function savaData() {
+        //数据校验
+        form.validate();
+        if (form.isValid() == false) {
+            return;
+        }
+
+        //数据保存
+        var formData = form.getData();
+        var dataBaseRelation = databaseRelationGrid.getData();
+        for (var i = 0; i < dataBaseRelation.length; i++) {
+            delete dataBaseRelation[i]._id;
+        }
+        formData.dataBaseRelation = dataBaseRelation;
+        if (curAction == "new") {
+            $.callJson({
+                url: "/infoshareConf/dataSourceConfig/saveDataBaseConfig",
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                cache: false,
+                async: false,
+                success: function (data) {
+                    CloseWindow("save");
+                },
+                error: function (e) {
+                    mini.alert("新增XML模板失败！");
+                }
+            });
+        } else if (curAction == "edit") {
+            if (xmlTemplateIdOld != mini.getbyName("dataBaseConfig.xmltemplateId").getValue()
+                || baseTableIdOld != mini.getbyName("dataBaseConfig.tableId").getValue()) {
+                mini.confirm("修改XML模板或基础表会删除相应的XML配置，确定修改？", "确定", function (action) {
+                    if (action == "ok") {
+                        editData(formData);
+                    }
+                });
+            } else {
+                editData(formData);
+            }
+        }
+    }
+
+    function editData(formData) {
+        $.callJson({
+            url: "/infoshareConf/dataSourceConfig/updateDataBaseConfig",
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            cache: false,
+            async: false,
+            success: function (data) {
+                CloseWindow("save");
+            },
+            error: function (e) {
+                mini.alert("修改XML模板失败！");
+            }
+        });
+    }
+
+    /**
+     * XML模板加载
+     */
+    function loadTreeGridData() {
+        $.callJson({
+            url: '/infoshareConf/xmlFormat/getDataBaseConfigByInfoshareId',
+            data: {infoshareId: infoshareId},
+            success: function (data) {
+                //XML配置
+                xmlFormatTree.loadList(data.xmlFormatConfigList, "id", "pid");
+            },
+            error: function (e) {
+                mini.alert("XML配置加载失败！");
+            }
+        });
+    }
+
+    /**
+     * 选择输出数据类
+     */
+    function selectTable(e) {
+        //初始化基础表关联字段
+        if (e.source.name == "dataBaseConfig.tableId") {
+            getTableColumns(e.source.value, mini.getbyName("dataBaseRelation.baseTableColumn"));
+            mini.getbyName("dataBaseConfig.tableName").setValue(e.item.tableName);
+            //清除关联表数据
+            databaseRelationGrid.clearRows();
+        }
+        //初始化关联表关联字段
+        if (e.source.name == "dataBaseRelation.tableId") {
+            getTableColumns(e.source.value, mini.getbyName("dataBaseRelation.relationTableColumn"));
+            mini.getbyName("dataBaseRelation.tableName").setValue(e.item.tableName);
+        }
+    }
+
+    /**
+     * cron表达式及其含义
+     */
+    function onDrawCell(e) {
+        var cronRcord = e.record;
+        if (cronRcord != undefined && cronRcord != null && cronRcord != "") {
+            e.cellHtml = cronRcord.value + "----" + cronRcord.explain
+        }
+    }
+
+    //  ====================================校验区====================================
+    /**
+     * 校验cron表达式
+     */
+    function validateCronExpression(e) {
+        if (e.value == null || e.value == "") {
+            return;
+        }
+        var cronInput = mini.getbyName(e.source.name);
+        var result = validateCronExpressionByInput(cronInput);
+        e.isValid = result;
+        if (!result) {
+            e.errorText = "cron表达式错误";
+        }
+    }
+
+    function validateCronExpressionByInput(cronInput) {
+        var result = true;
+        $.callJson({
+            url: "/infoshareConf/dataSourceConfig/validateCronExpression",
+            async: false,
+            data: {cronExpression: cronInput.getValue()},
+            success: function (data) {
+                result = data;
+            },
+            error: function (e) {
+                mini.alert("校验基础表的筛选条件失败！");
+                result = false;
+            }
+        });
+        return result;
+    }
+
+    /**
+     * 校验基础表的筛选条件
+     */
+    function validateBaseTableCondition(e) {
+        if (e.value == null || e.value == "") {
+            return;
+        }
+        var result = true;
+        $.callJson({
+            url: "/infoshareConf/dataSourceConfig/validateCondition",
+            async: false,
+            data: {
+                tableName: mini.getByName("dataBaseConfig.tableName").getValue(),
+                condition: mini.getByName("dataBaseConfig.condition").getValue()
+            },
+            success: function (data) {
+                result = data;
+            },
+            error: function (e) {
+                mini.alert("校验基础表的筛选条件失败！");
+                result = false;
+            }
+        });
+        e.isValid = result;
+        if (!result) {
+            e.errorText = "筛选条件错误";
+        }
+    }
+
+    /**
+     * 校验关联表的筛选条件
+     */
+    function validateRelationTableCondition(e) {
+        if (e.value == null || e.value == "") {
+            return;
+        }
+        var result = true;
+        $.callJson({
+            url: "/infoshareConf/dataSourceConfig/validateCondition",
+            async: false,
+            data: {
+                tableName: mini.getByName("dataBaseRelation.tableName").getValue(),
+                condition: mini.getByName("dataBaseRelation.condition").getValue()
+            },
+            success: function (data) {
+                result = data;
+            },
+            error: function (e) {
+                mini.alert("校验关联表的筛选条件失败！");
+                result = false;
+            }
+        });
+        e.isValid = result;
+        if (!result) {
+            e.errorText = "筛选条件错误";
+        }
+        console.warn(e)
+    }
+
+    /**
+     * 校验基础表和关联表的关联字段
+     */
+    function validateRelationTableColumn(e) {
+        if (e.value == null || e.value == "") {
+            return;
+        }
+        var result = true;
+        var baseTableColumn = mini.getByName("dataBaseRelation.baseTableColumn").getValue();
+        var relationTableColumn = mini.getByName("dataBaseRelation.relationTableColumn").getValue();
+        if (baseTableColumn == "" || relationTableColumn == "") {
+            return;
+        }
+        $.callJson({
+            url: "/infoshareConf/dataSourceConfig/validateRelations",
+            contentType: 'application/json',
+            async: false,
+            data: JSON.stringify(form.getData()),
+            success: function (data) {
+                result = data;
+            },
+            error: function (e) {
+                mini.alert("校验关联关系失败！");
+                result = false;
+            }
+        });
+        e.isValid = result;
+        if (!result) {
+            e.errorText = "关联关系错误";
+        }
+        console.warn(e)
+    }
+
+    /**
+     * 关联表配置选择行
+     */
+    function clickRow(e) {
+        var row = e.row;
+        mini.getbyName("dataBaseRelation.id").setValue(row.id);
+        mini.getbyName("dataBaseRelation.tableId").setValue(row.tableId);
+        mini.getbyName("dataBaseRelation.tableName").setValue(row.tableName);
+        mini.getbyName("dataBaseRelation.baseTableColumn").setValue(row.baseTableColumn);
+        mini.getbyName("dataBaseRelation.relationTableColumn").setValue(row.relationTableColumn);
+        mini.getbyName("dataBaseRelation.condition").setValue(row.condition);
+        selectRow = databaseRelationGrid.getRowByUID(row);
+        //初始化关联表关联字段
+        getTableColumns(row.tableId, mini.getbyName("dataBaseRelation.relationTableColumn"));
+    }
+
+    //  ====================================事件区====================================
+    //切换基础表
+    mini.get("baseTable").on("itemclick", selectTable);
+    //切换关联表
+    mini.get("relationTable").on("itemclick", selectTable);
+    //添加关联表
+    mini.get("addDatabaseRelation").on("click", addDatabaseRelation);
+    //关联表选择
+    databaseRelationGrid.on("rowclick", clickRow);
+    //修改关联表
+    mini.get("updateDatabaseRelation").on("click", updateDatabaseRelation);
+    //清空关联表
+    mini.get("cleanDatabaseRelation").on("click", cleanDatabaseRelation);
+    //保存
+    mini.get("savaData").on("click", savaData);
+    //取消
+    mini.get("onCancel").on("click", onCancel);
+    //全量发送频率校验
+    mini.getbyName("dataBaseConfig.allFrequency").on("validation", validateCronExpression);
+    //增量发送频率校验
+    mini.getbyName("dataBaseConfig.incFrequency").on("validation", validateCronExpression);
+    //基础表的筛选条件校验
+    mini.getbyName("dataBaseConfig.condition").on("validation", validateBaseTableCondition);
+    //关联表的筛选条件校验
+    mini.getbyName("dataBaseRelation.condition").on("validation", validateRelationTableCondition);
+    //基础表的关联字段校验
+    mini.getbyName("dataBaseRelation.baseTableColumn").on("validation", validateRelationTableColumn);
+    //关联表的关联字段校验
+    mini.getbyName("dataBaseRelation.relationTableColumn").on("validation", validateRelationTableColumn);
+</script>
+</body>
+</html>

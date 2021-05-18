@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.DestinationConfigRelationMapper">
+    <insert id="addData" parameterType="cn.les.ntfm.infoshare.entity.DestinationConfigDO">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="BEFORE">
+            SELECT (NVL(MAX(ID),0)+1) AS id FROM DESTINATIONCONFIG
+        </selectKey>
+        INSERT INTO DESTINATIONCONFIG(
+        ID,
+        INFOSHARECONFIG_ID,
+        DESTINATION_TYPE_ID,
+        DESTINATION_TYPE,
+        DESTINATION_ID,
+        STATUS_FLAG )
+        VALUES (
+        ${id},
+        ${infoshareconfigId},
+        ${destinationTypeId},
+        #{destinationType},
+        ${destinationId},
+        #{statusFlag} )
+    </insert>
+
+    <update id="updateById" parameterType="cn.les.ntfm.infoshare.entity.DestinationConfigDO">
+        UPDATE DESTINATIONCONFIG
+        <set>
+            STATUS_FLAG = #{statusFlag}
+        </set>
+        WHERE ID = ${id}
+    </update>
+    <delete id="deleteDataById" parameterType="java.lang.Long">
+        DELETE FROM DESTINATIONCONFIG
+        WHERE ID = ${id}
+    </delete>
+
+    <select id="listData" parameterType="cn.les.ntfm.infoshare.entity.DestinationConfigDO"
+            resultType="cn.les.ntfm.infoshare.entity.DestinationConfigDO">
+        SELECT ID,INFOSHARECONFIG_ID,DESTINATION_TYPE_ID,DESTINATION_TYPE,DESTINATION_ID,STATUS_FLAG
+        FROM DESTINATIONCONFIG
+        <where>
+            INFOSHARECONFIG_ID = ${infoshareconfigId}
+            <if test="destinationType != '' and destinationType != null">
+                AND DESTINATION_TYPE = #{destinationType}
+            </if>
+            <if test="statusFlag!=null">
+                AND STATUS_FLAG = #{statusFlag}
+            </if>
+        </where>
+    </select>
+</mapper>

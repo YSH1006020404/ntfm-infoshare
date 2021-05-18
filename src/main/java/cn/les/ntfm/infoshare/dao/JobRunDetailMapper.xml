@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.JobRunDetailMapper">
+    <resultMap id="jobRunDetailMap" type="cn.les.ntfm.infoshare.entity.JobRunDetailDO">
+        <result column="ID" property="id"/>
+        <result column="JOB_NAME" property="jobName"/>
+        <result column="JOB_GROUP" property="jobGroup"/>
+        <result column="CHECK_TIME" property="checkTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--数据清除-->
+    <update id="truncateTable">
+        TRUNCATE TABLE JOBRUNDETAIL
+    </update>
+
+    <!--数据新增-->
+    <insert id="addJobRunDetail" parameterType="cn.les.ntfm.infoshare.entity.JobRunDetailDO">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="BEFORE">
+            SELECT (NVL(MAX(ID),0)+1) AS id FROM JOBRUNDETAIL
+        </selectKey>
+        INSERT INTO JOBRUNDETAIL(ID,JOB_NAME,JOB_GROUP,CHECK_TIME)
+        VALUES(#{id},#{jobName},#{jobGroup},SYSDATE)
+    </insert>
+
+    <!--主键更新-->
+    <update id="updateJobRunDetailById" parameterType="cn.les.ntfm.infoshare.entity.JobRunDetailDO">
+        UPDATE JOBRUNDETAIL
+        SET CHECK_TIME=#{checkTime}
+        WHERE ID = #{id}
+    </update>
+
+    <!--条件检索-->
+    <select id="getJobRunDetail" parameterType="cn.les.ntfm.infoshare.entity.JobRunDetailDO"
+            resultMap="jobRunDetailMap">
+        SELECT ID, JOB_NAME, JOB_GROUP, CHECK_TIME
+        FROM JOBRUNDETAIL
+        WHERE JOB_NAME = #{jobName}
+          AND JOB_GROUP = #{jobGroup}
+    </select>
+
+    <!--主键检索-->
+    <select id="getJobRunDetailById" parameterType="java.lang.Long" resultMap="jobRunDetailMap">
+        SELECT ID, JOB_NAME, JOB_GROUP, CHECK_TIME
+        FROM JOBRUNDETAIL
+        WHERE ID = #{id}
+    </select>
+
+    <!--主键检索-->
+    <select id="getJobRunDetailByGroup" parameterType="java.lang.Long" resultMap="jobRunDetailMap">
+        SELECT ID, JOB_NAME, JOB_GROUP, CHECK_TIME
+        FROM JOBRUNDETAIL
+        WHERE JOB_GROUP = #{linkId}
+    </select>
+
+
+    <delete id="removeJobFromTable" parameterType="java.lang.Long">
+         delete  from JOBRUNDETAIL  where JOB_GROUP=#{id}
+    </delete>
+
+
+</mapper>

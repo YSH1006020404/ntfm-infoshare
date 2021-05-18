@@ -1,0 +1,218 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="header">
+
+    <meta http-equiv="pragma" content="no-cache"/>
+    <meta http-equiv="cache-control" content="no-cache"/>
+    <meta http-equiv="expires" content="0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chome=1"/>
+    <title data-title="AT-DS">信息共享配置</title>
+    <noscript>你的浏览器不支持脚本运行，请检查浏览器版本或安全设置！</noscript>
+    <script th:src="@{/webjars/jquery/jquery-1.9.1.js}"></script>
+    <script th:src="@{/webjars/lesframework/les.framework.ajax.js}"></script>
+    <script th:src="@{/webjars/lesframework/les.framework.js}"></script>
+    <script th:src="@{/common/js/common.js}"></script>
+    <script th:src="@{/webjars/miniui/boot.js}"></script>
+    <!--初始化css-->
+    <link rel="stylesheet" th:href="@{/common/css/reset.css}"/>
+    <!--提取的公共样式-->
+    <link rel="stylesheet" th:href="@{/common/css/miniCommonStyle.css}"/>
+    <!--字体图标-->
+    <link rel="stylesheet" th:href="@{/webjars/font/css/font-awesome.css}"/>
+    <!--主题样式  todo-->
+    <!--<link rel="stylesheet" th:href="@{/common/css/themeStyle.css}"/>-->
+    <!--提取的公共函数-->
+    <script th:src="@{/common/js/common.js}"></script>
+    <!--弹出统一参数配置-->
+    <script th:src="@{/common/js/popUpModule.js}"></script>
+
+
+    <script th:inline="javascript">
+        //开发阶段设置为true,项目上线后，改为false;
+        mini_debugger = false;
+
+        var path = [[${#httpServletRequest.getContextPath()}]];
+        var basePath = [[${#httpServletRequest.getScheme()}]] + "://" + [[${#httpServletRequest.getServerName()}]] + ":" + [[${#httpServletRequest.getServerPort()}]] + path + "/";
+        var UserSession = {
+
+            getCurrentAccountId: function () {
+                return [[${session._user_account}]];
+            },
+            getCurrentUserId: function () {
+                return [[${session._user_id}]];
+            },
+            getCurrentUserRealName: function () {
+                return [[${session._user_zh_name}]];
+            },
+            getCurrentUserName: function () {
+                return [[${session._user_name}]];
+            },
+            getCurrentGroupId: function () {
+                return [[${session._gid}]];
+            },
+            getCurrentUserType: function () {
+                return [[${session._user_type}]];
+            },
+            getCurrentUserRegion: function () {
+                return [[${session._user_region}]];
+            },
+            getCurrentUserToken: function () {
+                return [[${session._user_token}]]
+            },
+            getCurrentUserData: function () {
+                return [[${session._user_data}]]
+            },
+            getCurrentGroupName: function () {
+                return [[${session._gname}]];
+            },
+            getCurrentUserKind: function () {
+                return [[${session._user_kind}]];
+            },
+            getCurrentUserOnlineLimit: function () {
+                return [[${session._user_online_limit}]];
+            }
+        };
+        //项目前端全局常量配置
+        $.globalConfig({
+            'basePath': basePath,
+            'lesweb': basePath,
+            "downloadFileAction": "http://127.0.0.1:8081/file/filedownload",
+            'uploadFileAction': 'http://127.0.0.1:8081/file/fileupload',
+            'customProps': [[${les_customs_vars}]]
+        });
+        // 禁止浏览器鼠标右键
+        /*  window.oncontextmenu = function(){
+              return false;
+          };*/
+        window.addEventListener('message', function (ev) {
+            var act = ev.data.act;
+            if (act == 'sys_logout') {
+                var username = ev.data.msg.username;
+                $.callJson({
+                    url: '/shiro/common/loginOutByUsername',
+                    data: {
+                        'username': username
+                    },
+                    success: function () {
+
+                    },
+                    error: function (e) {
+                        console.error(e);
+                    }
+                })
+            }
+        })
+    </script>
+
+
+    <script>if (window.module) module = window.module;</script>
+</head>
+
+<!--websocket-->
+<body th:fragment="websocket">
+<script th:src="@{/webjars/sockjs-client/1.0.2/sockjs.min.js}"></script>
+<script th:src="@{/webjars/stomp-websocket/2.3.3/stomp.min.js}"></script>
+</body>
+<!--echarts-->
+<body th:fragment="echarts">
+<script th:src="@{/webjars/echarts/echarts4/echarts.min-4.2.1.js}"></script>
+</body>
+
+
+<!--openlayers-->
+<body th:fragment="openlayers">
+<link rel="stylesheet" th:href="@{/webjars/openlayer3/v5.3.0-dist/ol.css}"/>
+<script th:src="@{/webjars/openlayer3/v5.3.0-dist/ol.js}"></script>
+</body>
+
+
+<!--多列排序-->
+<body th:fragment="lesMultisort">
+<link rel="stylesheet" th:href="@{/webjars/lesMultisort/font/iconfont.css}"/>
+<link rel="stylesheet" th:href="@{/webjars/lesMultisort/multisort.css}"/>
+<script th:src="@{/webjars/lesMultisort/lesmultisort.js}"></script>
+</body>
+
+<!--LesCanlenar日期控件-->
+<body th:fragment="LesCanlenar">
+<link rel="stylesheet" th:href="@{/webjars/lesCanlenar/LesCanlenar.css}"/>
+<script th:src="@{/webjars/lesCanlenar/js/DispatchEvent.js}"></script>
+<script th:src="@{/webjars/lesCanlenar/js/getDate.js}"></script>
+<script th:src="@{/webjars/lesCanlenar/js/LesCanlenar.js}"></script>
+</body>
+
+<!--FMCanlenar日期控件-->
+<body th:fragment="FmCalendar">
+<script th:src="@{/webjars/FmCalendar/js/buttonedit.js}"></script>
+<script th:src="@{/webjars/FmCalendar/js/popupedit.js}"></script>
+<script th:src="@{/webjars/FmCalendar/js/DispatchEvent.js}"></script>
+<script th:src="@{/webjars/FmCalendar/js/FmCalendar.js}"></script>
+<script th:src="@{/webjars/FmCalendar/js/getDate.js}"></script>
+<script th:src="@{/webjars/FmCalendar/js/getTime.js}"></script>
+<script th:src="@{/webjars/FmCalendar/js/timespinner.js}"></script>
+<link rel="stylesheet" th:href="@{/webjars/FmCalendar/css/FmCalendar.css}">
+</body>
+
+
+<!--自定义滚动条-->
+<body th:fragment="mCustomScrollbar">
+<link rel="stylesheet" th:href="@{/webjars/mCustomScrollbar/jquery.mCustomScrollbar.css}"/>
+<script th:src="@{/webjars/ mCustomScrollbar/jquery.mCustomScrollbar.concat.min.js}"></script>
+</body>
+
+<!--下拉分页刷新-->
+<body th:fragment="pullRefresh">
+<script th:src="@{/webjars/js/pullRefresh.js}"></script>
+</body>
+
+
+<!--历史下拉自动补全-->
+<body th:fragment="AutoComplete">
+<script th:src="@{/webjars/js/self.AutoComplete.js}"></script>
+</body>
+
+<!--弹出面板-->
+<body th:fragment="lesPanel">
+<link rel="stylesheet" th:href="@{/webjars/lesPanel/blankpanel.css}"/>
+<script th:src="@{/webjars/lesPanel/velocity.min.js}"></script>
+<script th:src="@{/webjars/lesPanel/miniui.les.blankPanel.js}"></script>
+</body>
+
+<!--扩展的miniui-->
+<body th:fragment="extendedMiniui">
+
+<!--多列排序-->
+<link rel="stylesheet" th:href="@{/webjars/lesMultisort/font/iconfont.css}"/>
+<link rel="stylesheet" th:href="@{/webjars/lesMultisort/multisort.css}"/>
+<script th:src="@{/webjars/lesMultisort/lesmultisort.js}"></script>
+
+<!--日期控件-->
+<link rel="stylesheet" th:href="@{/webjars/lesCanlenar/LesCanlenar.css}"/>
+<script th:src="@{/webjars/lesCanlenar/js/DispatchEvent.js}"></script>
+<script th:src="@{/webjars/lesCanlenar/js/getDate.js}"></script>
+<script th:src="@{/webjars/lesCanlenar/js/LesCanlenar.js}"></script>
+
+<!--自定义滚动条-->
+<link rel="stylesheet" th:href="@{/webjars/mCustomScrollbar/jquery.mCustomScrollbar.css}"/>
+<script th:src="@{/webjars/ mCustomScrollbar/jquery.mCustomScrollbar.concat.min.js}"></script>
+
+<!--表格下拉刷新-->
+<script th:src="@{/webjars/js/pullRefresh.js}"></script>
+
+<!--历史记录-->
+<script th:src="@{/webjars/js/self.AutoComplete.js}"></script>
+
+<!--面板-->
+<link rel="stylesheet" th:href="@{/webjars/lesPanel/blankpanel.css}"/>
+<script th:src="@{/webjars/lesPanel/velocity.min.js}"></script>
+<script th:src="@{/webjars/lesPanel/miniui.les.blankPanel.js}"></script>
+
+<!--且或非组件-->
+<link rel="stylesheet" type="text/css" th:href="@{/webjars/lesAddor/addor.css}"/>
+<script th:src="@{/webjars/lesAddor/mini.les.addor.js}"></script>
+</body>
+
+
+</html>

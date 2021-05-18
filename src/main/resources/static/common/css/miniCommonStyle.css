@@ -1,0 +1,16 @@
+.mini-labelfield-label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    line-height: 35px;
+    width: 100px;
+}
+
+.labelName {
+    width: 15%;
+    text-align: right;
+}
+
+.labelInput {
+    width: 35%;
+}

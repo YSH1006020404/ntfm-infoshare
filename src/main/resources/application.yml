@@ -1,0 +1,170 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: NTFM_INFOSHARE
+  profiles:
+    conf:
+      path: /home/atc/config/javaweb/dbconfig.yml
+
+  output:
+    ansi:
+      enabled: always
+
+  thyemleaf:
+    prefix: classpath:/templates/
+    mode: html
+    suffix: .html
+    cache: false
+
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+
+  main:
+    allow-bean-definition-overriding: false
+
+  datasource:
+      filters: stat
+      testOnBorrow: false
+      testOnReturn: false
+      driver-class-name: oracle.jdbc.OracleDriver
+      type: com.alibaba.druid.pool.DruidDataSource
+      username: infoshare
+      password: ca2804
+
+custom:
+  datasource:
+    slave:
+      filters: stat
+      testOnBorrow: false
+      testOnReturn: false
+      driver-class-name: oracle.jdbc.OracleDriver
+      type: com.alibaba.druid.pool.DruidDataSource
+      url: jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = 172.28.18.10)(PORT = 1521))(CONNECT_DATA = (SERVER = DEDICATED)(SERVICE_NAME = fodb_ser)))
+      username: infoshare
+      password: ca2804
+
+zl:
+  message:
+    webPid: 137
+les:
+  mybatis:
+    sql:
+      print: enabled
+    tx:
+      timeout: 5000
+    dbStatus: false
+
+infoshare:
+  #核心线程数
+  corePoolSize: 100
+  #最大线程数
+  maximumPoolSize: 200
+  #更新时间字段
+  updateTimeColumn: UPDATETIME
+  #阻塞队列最大值
+  maxQueueSize: 1000
+  #休眠时间（单位：毫秒）
+  sleepTime: 10
+  #数据丢弃的休眠时间（单位：毫秒）
+  discardSleepTime: 5
+  #数据发送的休眠时间（单位：毫秒）
+  sendMsgSleepTime: 10
+  #freemarker模板路径
+  ftlPath: /home/atc/config/CETC/infoshare_data/
+  #日志路径
+  logBasePath: /home/atc/log/infoshare_log/
+  #删除C_表的存储过程名称
+  cleanCtablePro: pro_cleanCtable
+  #删除C_表的频率：每天凌晨一点(修改需要清除quartz数据)
+  cleanCtableProCron: 0 0 1 * * ?
+  #数据源：ntfm(全国流量) atfm(华北流量或三地CDM)
+  dataSourceLabel: ntfm
+  #是否给监控发送链路状态信息
+  sendLinkStatus: true
+  #链路监控发送的消息频率：
+  sendLinkStatusCron: 0/5 * * * * ?
+  #链路监控发送的消息头
+  sendLinkStatusHeader: "0189"
+  #TODO 需要删除quartz数据库 心跳消息发送频率
+  heartBeatFrequncy: 0/5 * * * * ?
+  #TCP消息最大长度
+  tcpMaxLength: 100000
+  #日期字段的数据库存储类型：DATE/VARCHAR 需要删除quartz数据库
+  dateType: DATE
+  #日期类型数据由北京时转换为UTC时 需要删除quartz数据库
+  transferToUTC: true
+  #activemq服务的默认URL
+  defalutActviemqURL: failover:(tcp://172.28.33.22:61616)
+  #activemq服务的默认URL
+  defalutIbmmqURL: 172.28.33.22(1414),172.28.33.23(1414)
+
+
+  #服务器连接失败的确认周期
+  comfirmPeriod:  3
+  #服务器连接检查周期
+  checkDBPeriod:  5
+  checkActivePeriod:  5
+  checkIbmPeriod:  5
+  checkFtpPeriod:  5
+  #判断实例存活的参数
+  missCheckPeriod: 3
+  #测试active连接时，等待返回值睡眠的时间
+  activeSleepTime:  1
+  isOracleTest:  false
+  oracleDriver:  oracle.jdbc.OracleDriver
+  oracleURL:  jdbc:oracle:thin:@172.28.41.199:1521:ORCL
+  #oracleURL :  jdbc:oracle:thin:@(DESCRIPTION =(ADDRESS = (PROTOCOL = TCP)(HOST = 172.28.8.21)(PORT = 1521))(CONNECT_DATA =(SERVER = DEDICATED)(SERVICE_NAME = fodb_ser)))
+  oracleUserName:  qginfoshare
+  oraclePwd:  ca2804
+  isActiveTest:  false
+  activeURL:  failover://(tcp://localhost:61616)
+  activeUserName:  admin
+  activePwd: admin
+  isIbmTest:  true
+  ibmURL:  172.28.128.32(1414),172.28.128.33(1414)
+  ibmManager:  NFPS
+  channel:  SVRCONN
+
+
+  isFtpTest:  false
+  ftpURL: 172.28.177.50
+  ftpUserName: atc
+  ftpPwd: P@ssword
+  ftpPort: 21
+
+mybatis:
+  # typeAliasesPackage: cn.les.ntfm.infoshare.entity
+  # mapperLocations: classpath*:mappers/*.xml
+#  config-location: classpath:mybatis-config.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    call-setters-on-nulls: true
+    return-instance-for-empty-row: true
+    jdbc-type-for-null: 'null'
+    #使全局的映射器启用或禁用缓存
+    cache-Enabled: true
+    #全局启用或禁用延迟加载。当禁用时，所有关联对象都会即时加载。
+    lazy-loading-enabled: true
+    #当启用时，有延迟加载属性的对象在被调用时将会完全加载任意属性。否则，每种属性将会按需要加载。
+    aggressive-lazy-loading: true
+    #是否允许单条sql 返回多个数据集  (取决于驱动的兼容性) default:true -->
+    multiple-result-sets-enabled: true
+    #允许JDBC 生成主键。需要驱动器支持。如果设为了true，这个设置将强制使用被生成的主键，有一些驱动器不兼容不过仍然可以执行。
+    use-generated-keys: true
+    #指定 MyBatis 如何自动映射 数据基表的列 NONE：不隐射　PARTIAL:部分  FULL:全部  -->
+    auto-mapping-behavior: partial
+    #对于批量更新操作缓存SQL以提高性能 BATCH,SIMPLE -->
+    default-executor-type: simple
+    #数据库超过25000秒仍未响应则超时 -->
+    default-statement-timeout: 25000
+    #设置本地缓存范围 session:就会有数据的共享  statement:语句范围 (这样就不会有数据的共享 ) defalut:session -->
+    local-cache-scope: statement
+
+#mybatis.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl
+#返回值类型是map时，字段为null也显示
+#所有返回字段为null时也显示
+
+

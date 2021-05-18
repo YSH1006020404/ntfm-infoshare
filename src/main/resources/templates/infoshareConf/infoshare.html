@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:include="include :: header"></head>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        html, body {
+            margin: 0px;
+            padding: 0px;
+            color: #e5e5e5;
+            background: #252727;
+            overflow: auto;
+        }
+
+        legend {
+            color: #d0d0cd;
+        }
+
+        label {
+            display: inline-block;
+            text-align: right;
+            width: 100px;
+            margin-right: 5px;
+        }
+
+        table {
+            width: 99%;
+        }
+
+        .row {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            border: 1px solid #3e4140;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            margin-bottom: -1px;
+        }
+
+        .row table {
+            position: relative;
+            border: 1px solid #3e4140;
+            padding-top: 5px;
+            margin-bottom: 1px;
+            margin-left: -18px;
+            width: 90%;
+        }
+
+        table .mini-textbox {
+            width: 98%;
+        }
+
+        table .mini-combobox {
+            width: 98%;
+        }
+
+        .mini-checkbox {
+            width: 3%;
+        }
+
+        fieldset {
+            margin-left: 1%;
+            margin-right: 1%;
+            margin-top: 1%;
+            border: solid 1px #3e4140;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+<div id="form1">
+    <div style="padding-top: 15px;padding-bottom: 5px;">
+        <input name="infoshareConfig.id" class="mini-hidden"/>
+        <input name="infoshareConfig.updateTime" class="mini-hidden"/>
+        <input name="infoshareConfig.interactionType" value="OUT" class="mini-hidden"/>
+        <input name="infoshareConfig.sourceType" class="mini-hidden"/>
+        <input name="infoshareConfig.sourceId" class="mini-hidden"/>
+        <table>
+            <tbody>
+            <tr>
+                <td colspan="3">
+                    <input labelField="true" label="链路描述：" name="infoshareConfig.linkDescription" class="mini-textbox"
+                           vtype="maxLength:200" style="width: 99%;"/>
+                </td>
+            </tr>
+            <tr>
+                <td width="33%">
+                    <input labelField="true" label="交互标识：" name="infoshareConfig.interactionMark" class="mini-textbox"
+                           vtype="maxLength:50" required="true"/>
+                </td>
+                <td width="33%">
+                    <input labelField="true" label="单位名称：" name="infoshareConfig.companyName" class="mini-textbox"
+                           vtype="maxLength:100" required="true"/>
+                </td>
+                <td width="33%">
+                    <input labelField="true" label="链路状态：" name="infoshareConfig.stateFlag"
+                           class="mini-combobox" url="/mainframe/json/startOrNot.json" required="true"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- 交互方式（终）-->
+    <fieldset>
+        <legend>输出</legend>
+        <div style="margin-left: 1%;">
+            <a class="mini-button" id="activeBtn" style="width: 13%;">增加activemq输出</a>
+            <a class="mini-button" id="ibmBtn" style="width: 11%;">增加ibmmq输出</a>
+            <a class="mini-button" id="ftpBtn" style="width: 10%;">增加ftp输出</a>
+            <a class="mini-button" id="tcpipBtn" style="width: 10%;">增加tcpip输出</a>
+            <a class="mini-button" id="deleteBtn" style="width: 8%;">删除</a>
+        </div>
+        <div style="height: 20px"></div>
+        <div id="activeSpace"></div>
+        <div id="ibmSpace"></div>
+        <div id="ftpSpace"></div>
+        <div id="tcpipSpace"></div>
+    </fieldset>
+
+    <div style="text-align:center;padding:5px;">
+        <a class="mini-button" id="saveBtn" style="margin-right:20px;">确定</a>
+        <a class="mini-button" id="cancelBtn" style="margin-right:20px;">取消</a>
+        <a class="mini-button" id="freshBtn">刷新</a>
+    </div>
+</div>
+
+<script>
+    "use strict";
+    mini.parse();
+    //   ================================== 变量定义=================================
+    //链路id
+    var linkId = null;
+    //是新建还是编辑操作（add edit）
+    var curAction = "add";
+    //表单值
+    var form = new mini.Form("form1");
+    //activemq输出链路序号
+    var activeIndex = -1;
+    //ibmmq输出链路序号
+    var ibmIndex = -1;
+    //ftp输出链路序号
+    var ftpIndex = -1;
+    //tcpip输出链路序号
+    var tcpipIndex = -1;
+    var $active = $("#activeSpace");
+    var $ibm = $("#ibmSpace");
+    var $ftp = $("#ftpSpace");
+    var $tcpip = $("#tcpipSpace");
+    //   ==================================== 函数定义区=============================
+    $(function (e) {
+        //链路状态默认值
+        mini.getbyName("infoshareConfig.stateFlag").select(0);
+    });
+
+    /**
+     *父页面调用子页面的setData函数
+     */
+    function SetData(action, linkId) {
+        curAction = action;
+        if (curAction == "edit") {
+            this.linkId = linkId;
+            loadData(linkId);
+        } else if (curAction == "add") {
+            $("#freshBtn").hide();
+        }
+    }
+
+    //初始化编辑页面
+    function loadData(linkId) {
+        $active.empty();
+        $ibm.empty();
+        $ftp.empty();
+        $tcpip.empty();
+
+        $.callJson({
+            url: "/infoshareConf/infoshare/queryMsgsById",
+            data: {"id": linkId},
+            cache: false,
+            success: function (data) {
+                linkId = data.infoshareConfig.id;
+                var actives = data.ACTIVEMQCONFIG;
+                createOuts(actives, activeHtml);
+                activeIndex = actives.length - 1;
+                var ibms = data.IBMMQCONFIG;
+                createOuts(ibms, ibmHtml);
+                ibmIndex = ibms.length - 1;
+                var ftps = data.FTPCONFIG;
+                createOuts(ftps, ftpHtml);
+                ftpIndex = ftps.length - 1;
+                var tcpips = data.TCPIPCONFIG;
+                createOuts(tcpips, tcpipHtml);
+                tcpipIndex = tcpips.length - 1;
+                form.setData(data);
+            },
+            error: function (e) {
+                mini.alert("链路查询失败！");
+            }
+        });
+    }
+
+    //获取服务器的默认地址
+    function getDefaultURL(serviceType) {
+        var defaultUrl = '';
+        $.callJson({
+            url: '/infoshareConf/infoshare/getDefaultURL',
+            data: {'serviceType': serviceType},
+            async: false,
+            success: function (data) {
+                defaultUrl = data;
+            },
+            error: function (e) {
+                mini.alert("获取服务器的默认地址失败！");
+            }
+        });
+        return defaultUrl;
+    }
+
+    //增加一条activemq输出
+    function addActive() {
+        //获取activemq服务的默认地址
+        var defaultUrl = getDefaultURL('Active mq');
+        activeHtml(++activeIndex, defaultUrl);
+        //队列类型默认值
+        mini.getByName("ACTIVEMQCONFIG[" + activeIndex + "].processMode").select(0);
+        //状态默认值
+        mini.getByName("ACTIVEMQCONFIG[" + activeIndex + "].destinationConfigDO.statusFlag").select(1);
+    }
+
+    //增加一条IBMMQ输出
+    function addIBM() {
+        //获取ibmmq服务的默认地址
+        var defaultUrl = getDefaultURL('IBM mq');
+        ibmHtml(++ibmIndex, defaultUrl);
+        //队列类型默认值
+        mini.getByName("IBMMQCONFIG[" + ibmIndex + "].processMode").select(0);
+        //状态默认值
+        mini.getByName("IBMMQCONFIG[" + ibmIndex + "].destinationConfigDO.statusFlag").select(1);
+    }
+
+    //增加一条ftp输出
+    function addFtp() {
+        ftpHtml(++ftpIndex);
+        //状态默认值
+        mini.getByName("FTPCONFIG[" + ftpIndex + "].destinationConfigDO.statusFlag").select(1);
+    }
+
+    //增加一条tcpip输出
+    function addTcpip() {
+        tcpipHtml(++tcpipIndex);
+        //状态默认值
+        mini.getByName("TCPIPCONFIG[" + tcpipIndex + "].destinationConfigDO.statusFlag").select(1);
+    }
+
+    /**
+     *删除输出方式配置
+     */
+    function cancelOut() {
+        var checkedObjects = $('input[type="checkbox"]:checkbox:checked');
+        if (checkedObjects.length <= 0) {
+            mini.alert("请先选择需要删除的输出!");
+        } else {
+            mini.confirm("确定删除选中的输出目的地？", "确定？",
+                function (action) {
+                    if (action == "ok") {
+                        checkedObjects.each(function () {
+                            var myname = this.name;
+                            $('input[name="' + this.name + '"]').parents("div .row").remove();
+                            if (myname.trim().startsWith("active")) {
+                                activeIndex--;
+                            } else if (myname.trim().startsWith("ibm")) {
+                                ibmIndex--;
+                            } else if (myname.trim().startsWith("tcpip")) {
+                                tcpipIndex--;
+                            } else if (myname.trim().startsWith("ftp")) {
+                                ftpIndex--;
+                            }
+                        });
+                    }
+                });
+        }
+    }
+
+    //确定：保存数据
+    function saveData() {
+        //表单校验
+        form.validate();
+        if (form.isValid() == false) {
+            return;
+        }
+        //输出方式校验
+        if ($("#activeSpace").children("div").length == 0
+            && $("#ibmSpace").children("div").length == 0
+            && $("#ftpSpace").children("div").length == 0
+            && $("#tcpipSpace").children("div").length == 0) {
+            mini.alert("输出方式不能为空!");
+            return;
+        }
+
+        // 获取表单数据
+        var form_data = form.getData();
+        if (curAction == "edit") {
+            $.callJson({
+                url: "/infoshareConf/infoshare/editMsgs",
+                contentType: 'application/json',
+                data: JSON.stringify(form_data),
+                success: function (data) {
+                    CloseWindow("save");
+                },
+                error: function (e) {
+                    mini.alert("链路更新失败！");
+                }
+            });
+        } else if (curAction == "add") {
+            $.callJson({
+                url: "/infoshareConf/infoshare/insertMsgs",
+                contentType: 'application/json',
+                data: JSON.stringify(form_data),
+                cache: false,
+                success: function (data) {
+                    CloseWindow("save");
+                },
+                error: function (e) {
+                    mini.alert("链路新增失败！");
+                }
+            });
+        }
+    }
+
+    /**
+     * 刷新页面
+     */
+    function fresh() {
+        loadData(linkId);
+    }
+
+    /**
+     * 创建输出链路
+     */
+    function createOuts(arr, func) {
+        if (arr != undefined && arr != null && arr.length > 0) {
+            for (var i = 0; i < arr.length; i++) {
+                func(i);
+            }
+        }
+    }
+
+    /**************拼接HTML*****start***************************/
+    //拼接active html
+    function activeHtml(key, defaultUrl) {
+        var html = [];
+        html.push('<div class="row" >');
+        html.push('<label for="out_active_mq">activemq</label>');
+        html.push('<input id="out_active_mq' + key + '" name="active_out' + key + '" textField="text" valueField="id" class="mini-checkbox"/>');
+        html.push('<input name="ACTIVEMQCONFIG[' + key + '].id" class="mini-hidden"/>');
+        html.push('<table id="out_active_mq_table">');
+        html.push('<tbody>');
+        html.push('<tr>');
+        html.push('<td colspan="2">');
+        html.push('<input labelField="true" label="URL：" name="ACTIVEMQCONFIG[' + key + '].url" class="mini-textbox" value="' + defaultUrl + '" errorMode="border" vtype="maxLength:100" required="true" style="width: 99%;"/> ');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('<tr>');
+        html.push('<td style="width: 50%">');
+        html.push('<input labelField="true" label="输出队列名：" name="ACTIVEMQCONFIG[' + key + '].destination" class="mini-textbox" errorMode="border" vtype="maxLength:100"  required="true" />');
+        html.push('</td>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="队列类型：" url="/mainframe/json/queueType.json" name="ACTIVEMQCONFIG[' + key + '].processMode" class="mini-combobox" required="true"/>');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('<tr>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="用户名：" name="ACTIVEMQCONFIG[' + key + '].userName" class="mini-textbox" errorMode="border" vtype="maxLength:50" />');
+        html.push('</td>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="密码：" name="ACTIVEMQCONFIG[' + key + '].password" class="mini-textbox" errorMode="border" vtype="maxLength:50" />');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('<tr>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="监控逻辑号：" name="ACTIVEMQCONFIG[' + key + '].destinationConfigDO.id" class="mini-textbox" allowInput="false" />');
+        html.push('</td>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="状态：" url="/mainframe/json/startOrNot.json" name="ACTIVEMQCONFIG[' + key + '].destinationConfigDO.statusFlag" class="mini-combobox " required="true"/>');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('</tbody>');
+        html.push('</table>');
+        html.push('</div>');
+
+        $active.append(html.join(""));
+        mini.parse();
+
+    }
+
+    //拼接ibm html
+    function ibmHtml(key, defaultUrl) {
+        var html = [];
+        html.push('<div class="row" >');
+        html.push('<label for="out_ibm_mq">ibmmq</label>');
+        html.push('<input id="out_ibm_mq' + key + '" name="ibm_out' + key + '" textField="text" valueField="id" class="mini-checkbox"/>');
+        html.push('<input name="IBMMQCONFIG[' + key + '].id" class="mini-hidden"/>');
+        html.push('<table id="out_ibm_mq_table">');
+        html.push('<tbody>');
+        html.push('<tr>');
+        html.push('<td colspan="2">');
+        html.push('<input labelField="true" label="URL：" name="IBMMQCONFIG[' + key + '].url" class="mini-textbox" value="' + defaultUrl + '" errorMode="border" vtype="maxLength:100" required="true" style="width: 99%;"/>');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('<tr>');
+        html.push('<td style="width: 50%">');
+        html.push('<input labelField="true" label="队列管理器：" name="IBMMQCONFIG[' + key + '].manager" class="mini-textbox" errorMode="border" vtype="maxLength:100"  required="true" />');
+        html.push('</td>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="通道：" name="IBMMQCONFIG[' + key + '].channel" class="mini-textbox" errorMode="border" vtype="maxLength:50"  required="true" />');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('<tr>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="输出队列名：" name="IBMMQCONFIG[' + key + '].destination" class="mini-textbox" errorMode="border" vtype="maxLength:100"  required="true" />');
+        html.push('</td>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="队列类型：" url="/mainframe/json/queueType.json" name="IBMMQCONFIG[' + key + '].processMode" class="mini-combobox" required="true"/>');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('<tr>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="用户名：" name="IBMMQCONFIG[' + key + '].userName" class="mini-textbox" errorMode="border" vtype="maxLength:50"  />');
+        html.push('</td>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="密码：" name="IBMMQCONFIG[' + key + '].password" class="mini-textbox" errorMode="border" vtype="maxLength:50" />');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('<tr>');
+        html.push('<td>');
+        html.push(' <input labelField="true" label="CCSID：" name="IBMMQCONFIG[' + key + '].ccsid" class="mini-textbox "\n' +
+            '       errorMode="border" vtype="float;maxLength:50" required="true" />');
+        html.push('</td>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="监控逻辑号：" name="IBMMQCONFIG[' + key + '].destinationConfigDO.id" class="mini-textbox" allowInput="false" />');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('<tr>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="状态：" url="/mainframe/json/startOrNot.json" name="IBMMQCONFIG[' + key + '].destinationConfigDO.statusFlag" class="mini-combobox " required="true"/>');
+        html.push('</td>');
+        html.push('<td>');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('</tbody>');
+        html.push('</table>');
+        html.push('</div>');
+
+        $ibm.append(html.join(""));
+        mini.parse();
+    }
+
+    //拼接ftp html
+    function ftpHtml(key) {
+        var html = [];
+        html.push('<div class="row" >');
+        html.push('<label for="ftp_out">ftp</label>');
+        html.push('<input id="out_ftp' + key + '" name="ftp_out' + key + '" textField="text" valueField="id" class="mini-checkbox"/>');
+        html.push('<input name="FTPCONFIG[' + key + '].id" class="mini-hidden"/>');
+        html.push('<table id="out_ftp_table">');
+        html.push('<tbody>');
+        html.push('<tr>');
+        html.push('<td style="width: 50%">');
+        html.push('<input labelField="true" label="URL：" name="FTPCONFIG[' + key + '].ip" class="mini-textbox" value="172.28.41.104" errorMode="border" vtype="url:maxLength:20" required="true"/>');
+        html.push('</td>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="端口：" name="FTPCONFIG[' + key + '].port" class="mini-textbox" errorMode="border" vtype="float:maxLength:20" required="true"/>');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('<tr>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="用户名：" name="FTPCONFIG[' + key + '].username" class="mini-textbox" errorMode="border" vtype="maxLength:20" required="true"/>');
+        html.push('</td>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="密码：" name="FTPCONFIG[' + key + '].password" class="mini-textbox" errorMode="border" vtype="maxLength:20" required="true"/>');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('<tr>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="上传路径：" name="FTPCONFIG[' + key + '].path" class="mini-textbox" errorMode="border" vtype="maxLength:100"/>');
+        html.push('</td>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="文件名前缀：" name="FTPCONFIG[' + key + '].fileNamePrefix" class="mini-textbox" errorMode="border" vtype="maxLength:20"/>');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('<tr>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="监控逻辑号：" name="FTPCONFIG[' + key + '].destinationConfigDO.id" class="mini-textbox" allowInput="false" />');
+        html.push('</td>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="状态：" url="/mainframe/json/startOrNot.json" name="FTPCONFIG[' + key + '].destinationConfigDO.statusFlag" class="mini-combobox" required="true"/>');
+        html.push('</td>');
+        html.push('<tr>');
+        html.push('</tbody>');
+        html.push('</table>');
+        html.push('</div>');
+
+        $ftp.append(html.join(""));
+        mini.parse();
+    }
+
+    function tcpipHtml(key) {
+        var html = [];
+        html.push('<div class="row" >');
+        html.push('<label for="tcpip_out">tcpip</label>');
+        html.push('<input id="out_tcp' + key + '" name="tcpip_out' + key + '" textField="text" valueField="id" class="mini-checkbox"/>');
+        html.push('<input name="TCPIPCONFIG[' + key + '].id" class="mini-hidden"/>');
+        html.push('<table id="out_tcp_table">');
+        html.push('<tbody>');
+        html.push('<tr>');
+        html.push('<td style="width: 50%">');
+        html.push('<input labelField="true" label="URL：" name="TCPIPCONFIG[' + key + '].ips" class="mini-textbox" errorMode="border" vtype="maxLength:50" required="true"/>');
+        html.push('</td>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="端口：" name="TCPIPCONFIG[' + key + '].port" class="mini-textbox" errorMode="border" vtype="float;maxLength:20"  required="true"/>');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('<tr>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="头：" name="TCPIPCONFIG[' + key + '].nummsghead" class="mini-textbox" errorMode="border" vtype="maxLength:20" required="true"/>');
+        html.push('</td>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="尾：" name="TCPIPCONFIG[' + key + '].nummsgtail" class="mini-textbox" errorMode="border" vtype="maxLength:20" required="true"/>');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('<tr>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="监控逻辑号：" name="TCPIPCONFIG[' + key + '].destinationConfigDO.id" class="mini-textbox" allowInput="false" />');
+        html.push('</td>');
+        html.push('<td>');
+        html.push('<input labelField="true" label="状态：" url="/mainframe/json/startOrNot.json" name="TCPIPCONFIG[' + key + '].destinationConfigDO.statusFlag" class="mini-combobox " required="true"/>');
+        html.push('</td>');
+        html.push('</tr>');
+        html.push('</tbody>');
+        html.push('</table>');
+        html.push('</div>');
+
+        $tcpip.append(html.join(""));
+        mini.parse();
+    }
+
+    /**************拼接HTML*****end***************************/
+    //  ====================================事件区====================================
+    mini.get("activeBtn").on("click", addActive);
+    mini.get("ibmBtn").on("click", addIBM);
+    mini.get("ftpBtn").on("click", addFtp);
+    mini.get("tcpipBtn").on("click", addTcpip);
+    mini.get("deleteBtn").on("click", cancelOut);
+    mini.get("saveBtn").on("click", saveData);
+    mini.get("cancelBtn").on("click", onCancel);
+    mini.get("freshBtn").on("click", fresh);
+
+</script>
+</body>
+</html>

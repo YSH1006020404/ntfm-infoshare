@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.PropertyDictMapper">
+    <!--根据字典项类型名称获取所有字典项-->
+    <select id="listDataByPropertyTypeName" parameterType="java.lang.String"
+            resultType="cn.les.ntfm.infoshare.entity.PropertyDictDO">
+        SELECT PD.ID,
+               PD.CREATE_USER,
+               PD.CREATE_TIME,
+               PD.UPDATE_USER,
+               PD.UPDATE_TIME,
+               PD.PROPERTYTYPE_ID,
+               PD.DISPLAY_SEQ,
+               PD.DISPLAY_NAME,
+               PD.DICT_VALUE,
+               PD.RELATION_TABLE,
+               PD.COLUMN_LABEL
+        FROM PROPERTYDICT PD
+                 INNER JOIN PROPERTYTYPE PT
+                            ON PD.PROPERTYTYPE_ID = PT.ID
+        WHERE PT.PROPERTY_NAME = #{name}
+        ORDER BY PD.DISPLAY_SEQ ASC
+    </select>
+    <select id="listJsonDataByPropertyTypeName" parameterType="java.lang.String" resultType="hashMap">
+        SELECT PD.ID AS ID,
+               PD.DISPLAY_NAME AS TEXT,
+               PD.RELATION_TABLE TABLE_NAME
+        FROM PROPERTYDICT PD
+                 INNER JOIN PROPERTYTYPE PT
+                            ON PD.PROPERTYTYPE_ID = PT.ID
+        WHERE PT.PROPERTY_NAME = #{name}
+        ORDER BY PD.DISPLAY_SEQ ASC
+    </select>
+
+    <!--根据字典项类型名称和字典项名称获取字典项-->
+    <select id="getPropertyDictByTypeNameAndDictName" resultType="cn.les.ntfm.infoshare.entity.PropertyDictDO">
+        SELECT PD.ID,
+               PD.CREATE_USER,
+               PD.CREATE_TIME,
+               PD.UPDATE_USER,
+               PD.UPDATE_TIME,
+               PD.PROPERTYTYPE_ID,
+               PD.DISPLAY_SEQ,
+               PD.DISPLAY_NAME,
+               PD.DICT_VALUE,
+               PD.RELATION_TABLE,
+               PD.COLUMN_LABEL
+        FROM PROPERTYDICT PD
+                 INNER JOIN PROPERTYTYPE PT
+                            ON PD.PROPERTYTYPE_ID = PT.ID
+        WHERE PT.PROPERTY_NAME = #{propertyName}
+          AND PD.DISPLAY_NAME = #{displayName}
+    </select>
+
+    <!--主键检索-->
+    <select id="getDataById" parameterType="java.lang.Long" resultType="cn.les.ntfm.infoshare.entity.PropertyDictDO">
+        SELECT ID,
+               CREATE_USER,
+               CREATE_TIME,
+               UPDATE_USER,
+               UPDATE_TIME,
+               PROPERTYTYPE_ID,
+               DISPLAY_SEQ,
+               DISPLAY_NAME,
+               DICT_VALUE,
+               RELATION_TABLE,
+               COLUMN_LABEL
+        FROM PROPERTYDICT
+        WHERE ID = #{id}
+    </select>
+
+    <select id="queryColumnLabel" resultType="cn.les.ntfm.infoshare.entity.PropertyDictDO">
+        select COLUMN_LABEL
+        from PROPERTYDICT
+        where ID = #{id}
+    </select>
+</mapper>

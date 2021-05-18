@@ -1,0 +1,25 @@
+[
+  {
+    "id": "TXT",
+    "text": "TXT"
+  },
+  {
+    "id": "SUBTYPE",
+    "text": "SUBTYPE"
+  },
+  {
+    "id": "YYYYMMDDHHMMSS",
+    "text": "YYYYMMDDHHMMSS"
+  },{
+    "id": "STATISTICS",
+    "text": "STATISTICS"
+  },
+  {
+    "id": "SERIAL",
+    "text": "SERIAL"
+  },
+  {
+    "id": "OTHER",
+    "text": "OTHER"
+  }
+]

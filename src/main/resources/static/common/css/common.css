@@ -1,0 +1,45 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+    overflow: hidden;
+}
+
+body {
+    background: #252727;
+}
+
+.container {
+    height: calc(100% - 20px);
+    width: calc(100% - 20px);
+    margin: 10px;
+}
+
+/*遮罩，loading*/
+.loading {
+    position: absolute;
+    display: none;
+    top: calc(50% - 50px);
+    left: calc(50% - 50px);
+    z-index: 999;
+}
+
+.loading img {
+    width: 100px;
+    height: 100px;
+}
+
+.overlay {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 10001;
+    display: none;
+    filter: alpha(opacity=60);
+    background-color: #777;
+    opacity: 0.5;
+    -moz-opacity: 0.5;
+    height: 100%;
+    width: 100%;
+}

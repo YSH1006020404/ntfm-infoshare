@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:include="include :: header"></head>
+<head>
+    <meta charset="UTF-8">
+    <title>XML配置</title>
+    <style>
+        body, html {
+            margin: 0px;
+            padding: 0px;
+            color: #e5e5e5;
+            background: #252727;
+        }
+
+        tr {
+            height: 45px;
+        }
+
+        fieldset {
+            margin-left: 1%;
+            margin-right: 1%;
+            margin-top: 1%;
+            border: solid 1px #3e4140;
+            position: relative;
+        }
+
+        legend {
+            color: #d0d0cd;
+        }
+
+        .mini-buttonedit, .mini-textbox {
+            width: 97%;
+        }
+
+        table {
+            width: 100%;
+            table-layout: fixed;
+        }
+    </style>
+</head>
+<body>
+<div id="editForm">
+    <fieldset>
+        <legend>XML格式配置</legend>
+        <table>
+            <input name="xmlFormat.id" class="mini-hidden"/>
+            <input name="xmlFormat.pid" class="mini-hidden"/>
+            <input name="xmlFormat.tableName" class="mini-hidden"/>
+            <input name="xmlFormat.outputrelationId" class="mini-hidden"/>
+            <tr>
+                <td class="labelName">节点名称：</td>
+                <td class="inputText">
+                    <input class="mini-textbox" name="xmlFormat.labelName" required="true"/>
+                </td>
+                <td class="labelName">节点类型：</td>
+                <td class="inputText"><input class="mini-combobox" required="true" url="/mainframe/json/labelType.json"
+                                             name="xmlFormat.labelType"/></td>
+            </tr>
+            <tr>
+                <td class="labelName">顺序：</td>
+                <td class="inputText"><input class="mini-spinner" minValue="1" maxValue="1000" errorMode="border"
+                                             required="true"
+                                             name="xmlFormat.displaySeq"/></td>
+                <td class="labelName valueShow">值：</td>
+                <td class="inputText valueShow"><input class="mini-textbox" name="xmlFormat.value"/></td>
+                <td class="labelName tableIdShow">数据源表：</td>
+                <td class="inputText tableIdShow"><input name="xmlFormat.tableId" class="mini-combobox"/></td>
+            </tr>
+        </table>
+    </fieldset>
+    <fieldset style="display: none;" id="outputColumns">
+        <legend>数据项配置</legend>
+        <input name="outputRelation.id" class="mini-hidden"/>
+        <table>
+            <tr>
+                <td class="labelName">数据字段：</td>
+                <td class="inputText"><input name="outputRelation.columnName" class="mini-combobox" errorMode="border"
+                                             required="true"
+                                             allowInput="true" ondrawcell="onDrawCell"/></td>
+                <td class="labelName"></td>
+            </tr>
+            <tr>
+                <td class="labelName">字段类型：</td>
+                <td class="inputText"><input url="/mainframe/json/columnType.json" name="outputRelation.columnType"
+                                             class="mini-combobox" showNullItem="false" readonly="true"/></td>
+                <td class="labelName dateFormatShow">日期格式：</td>
+                <td class="inputText dateFormatShow"><input url="/mainframe/json/dateType.json"
+                                                            name="outputRelation.dateFormat"
+                                                            class="mini-combobox" showNullItem="false"/></td>
+            </tr>
+            <tr>
+                <td class="labelName">注释：</td>
+                <td colspan="3">
+                    <input style="width: 99%;" name="outputRelation.explain" class="mini-textbox" allowInput="false"/>
+                </td>
+            </tr>
+        </table>
+    </fieldset>
+</div>
+<div style="text-align: center;padding: 10px;">
+    <a class="mini-button" style="margin-right: 10%;" id="savaData">确定</a>
+    <a class="mini-button" id="onCancel">取消</a>
+</div>
+<script>
+    mini.parse();
+    //新增/修改操作
+    var curAction;
+    var editForm = new mini.Form("#editForm");
+    var databaseConfigId;
+    var parentNode;
+
+    function SetData(data) {
+        curAction = data.action;
+        databaseConfigId = data.databaseConfigId;
+        parentNode = data.node;
+        //页面初始化
+        if (curAction == "new") {
+            //标签类型设置
+            $.callJson({
+                url: "/infoshareConf/xmlFormat/getLableTypeByPid",
+                data: {"pid": parentNode.id},
+                async: false,
+                cache: false,
+                success: function (data) {
+                    mini.getbyName("xmlFormat.labelType").setData(data);
+                }
+            });
+
+            //XML配置父键
+            mini.getbyName("xmlFormat.pid").setValue(parentNode.id);
+            //父节点类型
+            var parentLabelType = parentNode.labelType;
+            if (parentLabelType == "ROOTDATALIST" || parentLabelType == "DATALIST") {
+                //数据类型默认为DATAITEM
+                mini.getbyName("xmlFormat.labelType").select(7);
+                mini.getbyName("xmlFormat.labelType").setReadOnly(true);
+            } else if (parentLabelType == "DATAITEM") {
+                //数据类型默认为DATAITEM
+                mini.getbyName("xmlFormat.labelType").select(8);
+            }
+
+            setHtmlByLabelType(mini.getbyName("xmlFormat.labelType").getValue());
+            setHtmlByColumnType(mini.getbyName("outputRelation.columnType").getValue());
+        } else {
+            $.callJson({
+                url: "/infoshareConf/xmlFormat/getXmlFormatById",
+                data: {"id": parentNode.id},
+                cache: false,
+                success: function (data) {
+                    editForm.setData(data);
+                    setHtmlByLabelType(mini.getbyName("xmlFormat.labelType").getValue());
+                    setHtmlByColumnType(mini.getbyName("outputRelation.columnType").getValue());
+                },
+                error: function (e) {
+                    mini.alert("XML配置初始化失败！");
+                }
+            });
+        }
+    }
+
+    /**
+     * 根据节点类型显示和隐藏界面字段
+     */
+    function setHtmlByLabelType(labelType) {
+        $(".tableIdShow").hide();
+        if (labelType == "ROOTDATALIST" || labelType == "DATALIST") {
+            $(".tableIdShow").show();
+            //数据源表的下拉框选择数据
+            $.callJson({
+                url: "/infoshareConf/xmlFormat/listAvailableTables",
+                data: {databaseConfigId: databaseConfigId, labelType: labelType},
+                success: function (data) {
+                    mini.getbyName("xmlFormat.tableId").setData(data);
+                },
+                error: function (e) {
+                    mini.alert("检索数据源表失败！");
+                }
+            });
+            mini.getbyName("xmlFormat.tableId").setReadOnly(false);
+        }
+        if (labelType == "DATAITEM") {
+            $(".tableIdShow").show();
+            //数据源表的下拉框选择数据
+            $.callJson({
+                url: "/infoshareConf/xmlFormat/listAvailableTables",
+                data: {databaseConfigId: databaseConfigId, labelType: parentNode.labelType},
+                success: function (data) {
+                    mini.getbyName("xmlFormat.tableId").setData(data);
+                },
+                error: function (e) {
+                    mini.alert("检索数据源表失败！");
+                }
+            });
+            mini.getbyName("xmlFormat.tableId").setValue(parentNode.tableId);
+            mini.getbyName("xmlFormat.tableName").setValue(parentNode.tableName);
+            mini.getbyName("xmlFormat.tableId").setReadOnly(true);
+        }
+        //输出字段配置的显示和隐藏
+        if (labelType == "DBCOLUMN") {
+            $(".tableIdShow").show();
+            $("#outputColumns").show();
+            //数据源表的下拉框选择数据
+            $.callJson({
+                url: "/infoshareConf/xmlFormat/listAvailableTables",
+                data: {databaseConfigId: databaseConfigId, labelType: labelType},
+                success: function (data) {
+                    mini.getbyName("xmlFormat.tableId").setData(data);
+                },
+                error: function (e) {
+                    mini.alert("检索数据源表失败！");
+                }
+            });
+            mini.getbyName("xmlFormat.tableId").setValue(parentNode.tableId);
+            mini.getbyName("xmlFormat.tableName").setValue(parentNode.tableName);
+            mini.getbyName("xmlFormat.tableId").setReadOnly(true);
+            //初始化数据源的关联字段
+            getTableColumns(parentNode.tableId, mini.getbyName("outputRelation.columnName"));
+            if (curAction == "edit") {
+                //不允许修改节点类型
+                mini.getbyName("xmlFormat.labelType").setReadOnly(true);
+                //不允许修改数据字段
+                // mini.getbyName("outputRelation.columnName").setReadOnly(true);
+            }
+        } else {
+            //数据字段清空
+            mini.getbyName("outputRelation.columnName").setValue("");
+            //字段类型清空
+            mini.getbyName("outputRelation.columnType").setValue("");
+            //注释清空
+            mini.getbyName("outputRelation.explain").setValue("");
+            $("#outputColumns").hide();
+        }
+        //数据源表的显示和隐藏
+        if (labelType == "OTHER") {
+            $(".tableIdShow").hide();
+            if (parentNode.labelType == "DATAITEM") {
+                mini.getbyName("xmlFormat.tableId").setValue(parentNode.tableId);
+                mini.getbyName("xmlFormat.tableName").setValue(parentNode.tableName);
+            } else {
+                //数据源表清空
+                mini.getbyName("xmlFormat.tableId").setValue("");
+                mini.getbyName("xmlFormat.tableName").setValue("");
+            }
+        }
+
+        //默认值的显示和隐藏
+        if (labelType == "TXT" || labelType == "SUBTYPE") {
+            $(".valueShow").show();
+        } else {
+            mini.getbyName("xmlFormat.value").setValue("");
+            $(".valueShow").hide();
+        }
+    }
+
+    /**
+     * 根据输出字段类型显示和隐藏界面字段
+     */
+    function setHtmlByColumnType(columnType) {
+        if (columnType == "DATE") {
+            $(".dateFormatShow").show();
+        } else {
+            mini.getbyName("outputRelation.dateFormat").setValue("");
+            $(".dateFormatShow").hide();
+
+        }
+    }
+
+    /**
+     *节点类型选择
+     */
+    function onLabelTypeChanged(e) {
+        var labelType = e.item.id;
+        setHtmlByLabelType(labelType);
+    }
+
+    /**
+     * 选择数据源表
+     */
+    function changeTable(e) {
+        getTableColumns(e.source.value, mini.getbyName("outputRelation.columnName"));
+        mini.getbyName("xmlFormat.tableName").setValue(e.item.text);
+    }
+
+    /**
+     * 选择输出字段
+     */
+    function changeColumn(e) {
+        mini.getbyName("xmlFormat.labelName").setValue(e.item.id);
+        mini.getbyName("outputRelation.columnType").setValue(e.item.columnType);
+        setHtmlByColumnType(e.item.columnType);
+        mini.getbyName("outputRelation.explain").setValue(e.item.explain);
+    }
+
+    /**
+     * 选择输出字段类型
+     */
+    function changeColumnType(e) {
+        var columnType = e.item.id;
+        setHtmlByColumnType(columnType);
+    }
+
+    /**
+     *数据名称显示
+     */
+    function onDrawCell(e) {
+        var text = e.record;
+        if (text.explain == "" || text.explain == null) {
+            e.cellHtml = text.text;
+        } else {
+            e.cellHtml = text.text + "----" + text.explain;
+        }
+    }
+
+    /**
+     * 数据源校验
+     */
+    function validateTable(e) {
+        var labelType = mini.getbyName("xmlFormat.labelType").getValue();
+        if ((labelType == "ROOTDATALIST" || labelType == "DATALIST" || labelType == "DBCOLUMN")
+            && (e.value == null || e.value == "")) {
+            e.isValid = false;
+            e.errorText = "不能为空";
+        }
+    }
+
+    /**
+     * 日期类型校验
+     */
+    function validateDateFormat(e) {
+        var columnType = mini.getbyName("outputRelation.columnType").getValue();
+        if (columnType == "DATE" && (e.value == null || e.value == "")) {
+            e.isValid = false;
+            e.errorText = "不能为空";
+        }
+    }
+
+    /**
+     *XML配置保存
+     */
+    function savaData() {
+        editForm.validate();
+        if (editForm.isValid() == false) {
+            return;
+        }
+        var data = editForm.getData();
+        if (curAction == "new") {
+            $.callJson({
+                url: "/infoshareConf/xmlFormat/saveXmlFormat",
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                cache: false,
+                success: function (data) {
+                    CloseWindow("save");
+                },
+                error: function (e) {
+                    mini.alert("新增XML配置失败！");
+                }
+            });
+        } else {
+            $.callJson({
+                url: "/infoshareConf/xmlFormat/updateXmlFormat",
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                cache: false,
+                success: function (data) {
+                    CloseWindow("save");
+                },
+                error: function (e) {
+                    mini.alert("修改XML配置失败！");
+                }
+            });
+        }
+    }
+
+    //  ====================================事件区====================================
+    //切换节点类型
+    mini.getbyName("xmlFormat.labelType").on("itemclick", onLabelTypeChanged);
+    //切换数据源表
+    mini.getbyName("xmlFormat.tableId").on("itemclick", changeTable);
+    //切换输出字段
+    mini.getbyName("outputRelation.columnName").on("itemclick", changeColumn);
+    //切换输出字段类型
+    mini.getbyName("outputRelation.columnType").on("itemclick", changeColumnType);
+    //校验数据源表
+    mini.getbyName("xmlFormat.tableId").on("validation", validateTable);
+    //校验日期类型
+    mini.getbyName("outputRelation.dateFormat").on("validation", validateDateFormat);
+    //保存
+    mini.get("savaData").on("click", savaData);
+    //取消
+    mini.get("onCancel").on("click", onCancel);
+</script>
+</body>
+</html>

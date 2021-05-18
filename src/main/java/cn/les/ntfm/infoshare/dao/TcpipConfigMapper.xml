@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.TcpipConfigMapper">
+    <insert id="addData" parameterType="cn.les.ntfm.infoshare.entity.TcpipConfigDO">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="BEFORE">
+            SELECT (NVL(MAX(ID),0)+1) AS id FROM TCPIPCONFIG
+        </selectKey>
+        INSERT INTO TCPIPCONFIG (
+        ID,
+        IPS,
+        PORT,
+        NUMMSGHEAD,
+        NUMMSGTAIL,
+        OBJECT_NAME,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME )
+        VALUES(
+        ${id},
+        #{ips},
+        #{port},
+        #{nummsghead},
+        #{nummsgtail},
+        #{ips} || '_' || #{port},
+        'admin',
+        SYSDATE,
+        'admin',
+        SYSDATE )
+    </insert>
+
+    <update id="updateById" parameterType="cn.les.ntfm.infoshare.entity.TcpipConfigDO">
+        UPDATE TCPIPCONFIG
+        <set>
+            IPS = #{ips},
+            PORT = #{port},
+            NUMMSGHEAD = #{nummsghead},
+            NUMMSGTAIL = #{nummsgtail},
+            OBJECT_NAME = #{ips} || '_' || #{port},
+            UPDATE_USER = 'admin',
+            UPDATE_TIME = SYSDATE
+        </set>
+        WHERE ID = #{id}
+    </update>
+
+    <select id="getDataById" parameterType="java.lang.Long" resultType="cn.les.ntfm.infoshare.entity.TcpipConfigDO">
+        SELECT ID,
+               IPS,
+               PORT,
+               NUMMSGHEAD,
+               NUMMSGTAIL,
+               OBJECT_NAME,
+               CREATE_USER,
+               CREATE_TIME,
+               UPDATE_USER,
+               UPDATE_TIME
+        FROM TCPIPCONFIG
+        WHERE ID = #{id}
+    </select>
+</mapper>

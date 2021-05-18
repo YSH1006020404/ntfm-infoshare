@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.LinkStatisticsMapper">
+    <insert id="addData" parameterType="cn.les.ntfm.infoshare.entity.LinkStatisticsDO">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="BEFORE">
+            SELECT (NVL(MAX(ID),0)+1) AS id FROM LINKSTATISTICS
+        </selectKey>
+        INSERT INTO LINKSTATISTICS (
+        ID,
+        INFOSHARECONFIG_ID,
+        DESTINATIONCONFIG_ID,
+        STATISTICS_TIME,
+        STATISTICS_COUNT,
+        SERIAL_NUMBER,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME)
+        VALUES (
+        #{id},
+        #{infoshareconfigId},
+        #{destinationconfigId},
+        #{statisticsTime},
+        #{statisticsCount},
+        #{serialNumber},
+        'admin',
+        SYSDATE,
+        'admin',
+        SYSDATE)
+    </insert>
+
+    <select id="getDataById" parameterType="java.lang.Long"
+            resultType="cn.les.ntfm.infoshare.entity.LinkStatisticsDO">
+        SELECT ID,
+               INFOSHARECONFIG_ID,
+               DESTINATIONCONFIG_ID,
+               STATISTICS_TIME,
+               STATISTICS_COUNT,
+               SERIAL_NUMBER,
+               CREATE_USER,
+               CREATE_TIME,
+               UPDATE_USER,
+               UPDATE_TIME
+        FROM LINKSTATISTICS
+        WHERE ID = #{id}
+    </select>
+
+    <select id="listData" parameterType="cn.les.ntfm.infoshare.entity.LinkStatisticsDO"
+            resultType="cn.les.ntfm.infoshare.entity.LinkStatisticsDO">
+        SELECT ID,
+        INFOSHARECONFIG_ID,
+        DESTINATIONCONFIG_ID,
+        STATISTICS_TIME,
+        STATISTICS_COUNT,
+        SERIAL_NUMBER,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME
+        FROM LINKSTATISTICS
+        <where>
+            <if test="id != '' and id != null">ID = #{id}</if>
+            <if test="infoshareconfigId != '' and infoshareconfigId != null">
+                AND INFOSHARECONFIG_ID = #{infoshareconfigId}
+            </if>
+            <if test="destinationconfigId != '' and destinationconfigId != null">
+                AND DESTINATIONCONFIG_ID = #{destinationconfigId}
+            </if>
+            <if test="destinationconfigId == '' or destinationconfigId == null">
+                AND DESTINATIONCONFIG_ID IS NULL
+            </if>
+            <if test="statisticsTime != '' and statisticsTime != null">
+                AND STATISTICS_TIME = #{statisticsTime}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteDataById" parameterType="java.lang.Long">
+        DELETE
+        FROM LINKSTATISTICS
+        WHERE ID = #{id}
+    </delete>
+
+    <update id="updateStatisticsCount" parameterType="cn.les.ntfm.infoshare.entity.LinkStatisticsDO">
+        UPDATE LINKSTATISTICS
+        <set>
+            STATISTICS_COUNT = STATISTICS_COUNT + 1,
+            UPDATE_USER = 'admin',
+            UPDATE_TIME = SYSDATE
+        </set>
+        <where>
+            INFOSHARECONFIG_ID = #{infoshareconfigId}
+            AND DESTINATIONCONFIG_ID = #{destinationconfigId}
+            AND STATISTICS_TIME = #{statisticsTime}
+        </where>
+    </update>
+
+    <update id="updateSerialNumber" parameterType="cn.les.ntfm.infoshare.entity.LinkStatisticsDO">
+        UPDATE LINKSTATISTICS
+        <set>
+            SERIAL_NUMBER = NVL(SERIAL_NUMBER,0) + 1,
+            UPDATE_USER = 'admin',
+            UPDATE_TIME = SYSDATE
+        </set>
+        <where>
+            INFOSHARECONFIG_ID = #{infoshareconfigId}
+            AND DESTINATIONCONFIG_ID IS NULL
+            AND STATISTICS_TIME = #{statisticsTime}
+        </where>
+    </update>
+</mapper>

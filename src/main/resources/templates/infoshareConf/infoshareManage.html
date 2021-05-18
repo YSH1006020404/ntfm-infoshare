@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:include="include :: header"></head>
+<head>
+    <meta charset="UTF-8">
+    <title>信息共享</title>
+
+    <style>
+        body, html {
+            margin: 0px;
+            padding: 0px;
+            color: #e5e5e5;
+            background: #252727;
+        }
+
+        .title {
+            padding-left: 10px;
+            width: calc(100% - 10px);
+            height: 60px;
+            margin-bottom: 10px;
+            background-color: #48494D;
+            color: #f5f5f5;
+            font-size: 20px;
+            line-height: 60px;
+            font-family: "Microsoft YaHei UI";
+        }
+
+    </style>
+</head>
+<body>
+<div id="title" class="title">共享信息参数配置</div>
+<div class="content">
+
+    <div style="padding-bottom:10px; float: right;">
+        <span>交互标识：</span><input id="interactionMark" class="mini-textbox" type="text"/>
+        <span>单位名称：</span><input id="companyName" class="mini-textbox" type="text"/>
+        <span>链路状态：</span><input id="stateFlag" class="mini-combobox " showNullItem="true"
+                                 url="/mainframe/json/startOrNot.json"/>
+        <a class="mini-button" id="search">查找</a>
+        <a class="mini-button" id="clear">清空</a>
+    </div>
+    <div>
+        <a class="mini-button" id="addLink">新增链路</a>
+        <a class="mini-button" id="copyLink">复制链路</a>
+        <a class="mini-button" id="delLink">删除链路</a>
+        <a class="mini-button" style="margin-left: 50px" id="xmlTemplateManage">XML模板配置</a>
+    </div>
+
+    <div id="infoshareGrid" class="mini-datagrid" url="/infoshareConf/infoshare/queryMsgs" idField="id"
+         allowResize="false" multiSelect="true" showPager="true" pageSize="25" sizeList="[20,50,100]"
+         showPagerButtonText="true" showPagerButtonIcon="false" style="height: 1200px;">
+        <div property="columns">
+            <!--<div headerAlign="center" type="indexcolumn" width="3%">序号</div>-->
+            <div headerAlign="center" type="checkcolumn" width="3%">选择</div>
+            <div field="id" width="5%" align="center" headerAlign="center">链路id</div>
+            <div field="destinations" width="5%" align="center" headerAlign="center">监控逻辑号</div>
+            <div field="interactionMark" width="5%" align="center" headerAlign="center">交互标识</div>
+            <div field="companyName" width="5%" align="center" headerAlign="center">单位名称</div>
+            <div field="tableName" width="5%" align="center" headerAlign="center">基础表</div>
+            <div field="linkDescription" width="10%" align="center" headerAlign="center">链路描述</div>
+            <div field="stateFlag" width="5%" align="center" headerAlign="center" renderer="onOnOffRenderer">链路状态</div>
+            <!--<div field="beatFlag" width="5%" align="center" headerAlign="center" renderer="onIsNoRenderer">发送心跳</div>
+            <div field="deduplicationFlag" width="5%" align="center" headerAlign="center" renderer="onIsNoRenderer">
+                增量去重
+            </div>-->
+            <div field="operation" width="5%" align="center" renderer="onSourceRenderer" headerAlign="center">数据源</div>
+            <!--<div field="operation" width="3%" align="center" renderer="onDestinationRenderer" headerAlign="center">数据目的地
+            </div>-->
+            <div field="operation" width="5%" align="center" renderer="onEditRenderer" headerAlign="center">操作</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    "use strict";
+    mini.parse();
+    //   ================================== 变量定义=================================
+    var grid1 = mini.get("infoshareGrid");
+
+    //   ==================================== 函数定义区=============================
+    $(function (e) {
+        //加载首页信息列表
+        search();
+    });
+
+    /**
+     * 查询
+     */
+    function search() {
+        var interactionMark = mini.get("interactionMark").getValue();
+        var companyName = mini.get("companyName").getValue();
+        var stateFlag = mini.get("stateFlag").getValue();
+        if (stateFlag == "true") {
+            stateFlag = 1;
+        } else if (stateFlag == "false") {
+            stateFlag = 0;
+        }
+        var data = {};
+        data.interactionMark = interactionMark;
+        data.companyName = companyName;
+        data.stateFlag = stateFlag;
+        grid1.load(data);
+    }
+
+    /**
+     *新增链路
+     */
+    function addLink() {
+        mini.open({
+            url: "templates/infoshareConf/infoshare.html",
+            title: "新增交互项配置",
+            width: 1300,
+            height: 800,
+            onload: function () {
+                this.getIFrameEl();
+            },
+            ondestroy: function (action) {
+                search();
+            }
+        });
+    }
+
+    /**
+     *复制链路
+     */
+    function copyLink() {
+        var rows = grid1.getSelecteds();
+        if (rows.length == 0) {
+            mini.alert("请选择要复制的链路！");
+        } else {
+            var infoshareIds = [];
+            for (var i = 0; i < rows.length; i++) {
+                infoshareIds[i] = rows[i].id;
+            }
+            $.callJson({
+                url: '/infoshareConf/infoshare/copyLinks',
+                data: {'infoshareIds': infoshareIds},
+                success: function (data) {
+                    search();
+                },
+                error: function (e) {
+                    mini.alert("复制链路失败！");
+                }
+            });
+        }
+    }
+
+    /**
+     * 删除链路
+     */
+    function delLink() {
+        var rows = grid1.getSelecteds();
+        if (rows.length == 0) {
+            mini.alert("请选择要删除的链路！");
+        } else {
+            var infoshareIds = [];
+            for (var i = 0; i < rows.length; i++) {
+                infoshareIds[i] = rows[i].id;
+            }
+            mini.confirm("确定删除链路？", "确定？",
+                function (action) {
+                    if (action == "ok") {
+                        //向后台传输需删除的链路
+                        $.callJson({
+                            url: '/infoshareConf/infoshare/delLinks',
+                            data: {'infoshareIds': infoshareIds},
+                            success: function (data) {
+                                search();
+                            },
+                            error: function (e) {
+                                mini.alert("删除链路失败！");
+                            }
+                        });
+                    }
+                }
+            );
+        }
+    }
+
+    /**
+     * XML模板配置
+     */
+    function xmlTemplateManage() {
+        mini.open({
+            url: "templates/infoshareConf/xmlTemplateManage.html",
+            title: "XML模板配置管理",
+            width: 1620,
+            height: 1000
+        });
+    }
+
+    /**
+     * 清空选项
+     */
+    function clear() {
+        mini.get("interactionMark").setValue("");
+        mini.get("companyName").setValue("");
+        mini.get("stateFlag").setValue("");
+    }
+
+    /**
+     * 数据源配置
+     */
+    function onSourceRenderer(e) {
+        var linkId = e.record.id;
+        var xmlFormatId = e.record.xmlformatconfigId;
+        var companyName = e.record.companyName;
+        var sourceType = e.record.sourceType;
+        var databaseConfigId = e.record.sourceId;
+        var result;
+        if (sourceType == null || sourceType == '' || sourceType == undefined) {
+            result = '<a class="mini-button"  style="padding:2px 5px;" href="javascript:createConfigHtml(\'source.html\',\''
+                + companyName + '-配置数据源\',\'1400\',\'800\',\'new\',\''
+                + linkId + '\')">添加</a>';
+        } else if (sourceType == "4") {
+            result = '<a class="mini-button"  style="padding:2px 5px;" href="javascript:createConfigHtml(\'source.html\',\''
+                + companyName + '-配置数据源\',\'1400\',\'800\',\'edit\',\''
+                + linkId + '\')">修改</a>'
+                + '<a class="mini-button" style="margin-left:5px;padding:2px 5px;" href="javascript:createConfigHtml(\'xmlFormatManage.html\',\''
+                + companyName + '-配置XML\',\'1700\',\'800\',\''
+                + databaseConfigId + '\',\''
+                + xmlFormatId + '\')">XML配置</a>';
+        } else {
+            result = '<a class="mini-button"  style="padding:2px 5px;" href="javascript:createConfigHtml(\'source.html\',\''
+                + companyName + '-配置数据源\',\'1400\',\'800\',\'edit\',\''
+                + linkId + '\')">修改</a>'
+        }
+        return result;
+    }
+
+    /**
+     * 数据目的地配置
+     */
+    function onDestinationRenderer(e) {
+        var record = e.record;
+        var s = '<a class="mini-button" style="padding:2px 5px;" href="javascript:configOutput(\'' + record.companyName + '\',\'' + record.id + '\')">配置</a>';
+        return s;
+    }
+
+    /**
+     *编辑
+     */
+    function onEditRenderer(e) {
+        var linkId = e.record.id;
+        var stateFlag = e.record.stateFlag;
+        var companyName = e.record.companyName;
+        var result = '<a class="mini-button"  style="padding:2px 5px;" href="javascript:createConfigHtml(\'infoshare.html\',\''
+            + companyName + '-编辑\',\'1300\',\'800\',\'edit\',\''
+            + linkId + '\')">编辑</a>'
+            + '<a class="mini-button" style="margin-left:5px;padding:2px 5px;" onclick="triggerAll(' + linkId + ',' + stateFlag + ')">触发全量</a>';
+        return result;
+    }
+
+    function createConfigHtml(htmlName, htmlTitle, htmlWidth, htmlHeight, param1, param2) {
+        mini.open({
+            url: "templates/infoshareConf/" + htmlName,
+            title: htmlTitle,
+            width: htmlWidth,
+            height: htmlHeight,
+            onload: function () {
+                var iframe = this.getIFrameEl();
+                iframe.contentWindow.SetData(param1, param2);
+            },
+            ondestroy: function (action) {
+                search();
+            }
+        });
+    }
+
+    /**
+     * 触发全量
+     * @param linkId 链路ID
+     * @param stateFlag 链路状态
+     */
+    function triggerAll(linkId, stateFlag) {
+        if (stateFlag == 0) {
+            mini.alert("关闭的链路不能触发全量！");
+        } else {
+            mini.confirm("确定触发全量？", "确定？",
+                function (action) {
+                    if (action == "ok") {
+                        $.callJson({
+                            url: '/infoshareConf/infoshare/triggerAll',
+                            data: {'infoshareId': linkId},
+                            timeout: 10000,
+                            success: function (data) {
+                                mini.alert("触发全量操作完成！");
+                            },
+                            error: function (e) {
+                                mini.alert("触发全量操作失败！");
+                                console.error(e)
+                            }
+                        });
+                    }
+                });
+
+        }
+    }
+
+    //  ====================================事件区====================================
+    //查找
+    mini.get("search").on("click", search);
+    //清空
+    mini.get("clear").on("click", clear);
+    //新增链路
+    mini.get("addLink").on("click", addLink);
+    //复制链路
+    mini.get("copyLink").on("click", copyLink);
+    //删除链路
+    mini.get("delLink").on("click", delLink);
+    //配置XML
+    mini.get("xmlTemplateManage").on("click", xmlTemplateManage);
+</script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.XmlFormatConfigMapper">
+    <!--新增-->
+    <insert id="addData" parameterType="cn.les.ntfm.infoshare.entity.XmlFormatConfigDO">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="BEFORE">
+            SELECT (NVL(MAX(ID),0)+1) AS id FROM XMLFORMATCONFIG
+        </selectKey>
+        INSERT INTO XMLFORMATCONFIG
+        (ID, PID, LABEL_NAME, LABEL_TYPE, DISPLAY_SEQ, VALUE, TABLE_ID, TABLE_NAME, OUTPUTRELATION_ID, CREATE_USER,
+        CREATE_TIME, UPDATE_USER, UPDATE_TIME)
+        VALUES
+        (#{id}, #{pid}, #{labelName}, #{labelType}, #{displaySeq}, #{value}, #{tableId}, #{tableName},
+        #{outputrelationId},'admin', SYSDATE,'admin', SYSDATE)
+    </insert>
+
+    <!--主键修改-->
+    <update id="updateDataById" parameterType="cn.les.ntfm.infoshare.entity.XmlFormatConfigDO">
+        UPDATE XMLFORMATCONFIG
+        <set>
+            PID = #{pid},
+            DISPLAY_SEQ = #{displaySeq},
+            LABEL_NAME = #{labelName},
+            LABEL_TYPE = #{labelType},
+            VALUE = #{value},
+            TABLE_ID = #{tableId},
+            TABLE_NAME = #{tableName},
+            OUTPUTRELATION_ID = #{outputrelationId},
+            UPDATE_USER = 'admin',
+            UPDATE_TIME = SYSDATE
+        </set>
+        WHERE ID = #{id}
+    </update>
+
+    <!--主键检索-->
+    <select id="getDataById" parameterType="java.lang.Long" resultType="cn.les.ntfm.infoshare.entity.XmlFormatConfigDO">
+        SELECT ID,
+               PID,
+               DISPLAY_SEQ,
+               LABEL_NAME,
+               LABEL_TYPE,
+               VALUE,
+               TABLE_ID,
+               TABLE_NAME,
+               OUTPUTRELATION_ID,
+               CREATE_USER,
+               CREATE_TIME,
+               UPDATE_USER,
+               UPDATE_TIME
+        FROM XMLFORMATCONFIG
+        WHERE ID = #{id}
+    </select>
+    <!--删除本级及下级节点-->
+    <delete id="deleteDataById" parameterType="java.lang.Long">
+        DELETE
+        FROM XMLFORMATCONFIG
+        WHERE ID = #{id}
+    </delete>
+
+    <!--根据输出字段配置ID删除关联XML配置-->
+    <delete id="deleteDataByOutputrelationId" parameterType="java.lang.Long">
+        DELETE
+        FROM XMLFORMATCONFIG
+        WHERE OUTPUTRELATION_ID = #{outputrelationId}
+    </delete>
+    <!--获取所有xml配置信息-->
+    <select id="listXmlFormatConfig" parameterType="cn.les.ntfm.infoshare.entity.XmlFormatConfigDO"
+            resultType="cn.les.ntfm.infoshare.entity.XmlFormatConfigDO">
+        SELECT ID,
+        PID,
+        DISPLAY_SEQ,
+        LABEL_NAME,
+        LABEL_TYPE,
+        VALUE,
+        TABLE_ID,
+        TABLE_NAME,
+        OUTPUTRELATION_ID,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME
+        FROM XMLFORMATCONFIG
+        <where>
+            <if test="labelName!=null and labelName!=''">
+                AND LABEL_NAME = #{labelName}
+            </if>
+            <if test="labelType!=null and labelType!=''">
+                AND LABEL_TYPE = #{labelType}
+            </if>
+            <if test="tableId!=null and tableId!=''">
+                AND TABLE_ID = #{tableId}
+            </if>
+            <if test="outputrelationId!=null and outputrelationId!=''">
+                AND OUTPUTRELATION_ID = #{outputrelationId}
+            </if>
+        </where>
+        <choose>
+            <when test="id !=null and id != ''">
+                START WITH ID = #{id} CONNECT BY PRIOR ID = PID
+                ORDER SIBLINGS BY DISPLAY_SEQ ASC
+            </when>
+            <otherwise>
+                ORDER BY DISPLAY_SEQ ASC
+            </otherwise>
+        </choose>
+    </select>
+
+    <!--获取下一层子节点-->
+    <select id="listByPid" resultType="cn.les.ntfm.infoshare.entity.XmlFormatConfigDO">
+        SELECT ID,
+        PID,
+        DISPLAY_SEQ,
+        LABEL_NAME,
+        LABEL_TYPE,
+        VALUE,
+        TABLE_ID,
+        TABLE_NAME,
+        OUTPUTRELATION_ID,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME
+        FROM XMLFORMATCONFIG
+        <where>
+            PID = #{pid}
+            <if test="labelType!=null and labelType!=''">
+                AND LABEL_TYPE=#{labelType}
+            </if>
+        </where>
+        ORDER BY DISPLAY_SEQ ASC
+    </select>
+
+    <!--根据主键获取DATAITEM父节点-->
+    <select id="getDataItemById" parameterType="java.lang.Long"
+            resultType="cn.les.ntfm.infoshare.entity.XmlFormatConfigDO">
+        SELECT ID,
+               PID,
+               LABEL_NAME,
+               DISPLAY_SEQ,
+               LABEL_TYPE,
+               VALUE,
+               OUTPUTRELATION_ID,
+               CREATE_USER,
+               CREATE_TIME,
+               UPDATE_USER,
+               UPDATE_TIME
+        FROM (
+                 SELECT ID,
+                        PID,
+                        LABEL_NAME,
+                        DISPLAY_SEQ,
+                        LABEL_TYPE,
+                        VALUE,
+                        OUTPUTRELATION_ID,
+                        CREATE_USER,
+                        CREATE_TIME,
+                        UPDATE_USER,
+                        UPDATE_TIME,
+                        ROWNUM
+                 FROM XMLFORMATCONFIG
+                 WHERE LABEL_TYPE = 'DATAITEM'
+                     START
+                 WITH ID =
+                      ${id}
+                 CONNECT BY PRIOR PID = ID
+                 ORDER BY LEVEL ASC)
+        WHERE ROWNUM = 1
+    </select>
+    <select id="getInfoshareByXmlformatId" parameterType="java.lang.Long"
+            resultType="cn.les.ntfm.infoshare.entity.InfoshareConfigDO">
+        SELECT T1.ID               AS ID,
+               T1.INTERACTION_MARK AS INTERACTION_MARK,
+               T1.COMPANY_NAME     AS COMPANY_NAME,
+               T1.INTERACTION_TYPE AS INTERACTION_TYPE,
+               T1.STATE_FLAG       AS STATE_FLAG,
+               T1.SOURCE_TYPE      AS SOURCE_TYPE,
+               T1.SOURCE_ID        AS SOURCE_ID,
+               T1.CREATE_USER      AS CREATE_USER,
+               T1.CREATE_TIME      AS CREATE_TIME,
+               T1.UPDATE_USER      AS UPDATE_USER,
+               T1.UPDATE_TIME      AS UPDATE_TIME
+        FROM INFOSHARECONFIG T1
+                 INNER JOIN DATABASECONFIG T2
+                            ON T1.SOURCE_ID = T2.ID
+                 INNER JOIN (
+                SELECT *
+                FROM XMLFORMATCONFIG
+                WHERE PID IS NULL
+                    START
+                WITH ID =
+                     ${xmlformatId}
+                CONNECT BY PRIOR PID = ID) T3
+                            ON T2.XMLFORMATCONFIG_ID = T3.ID
+    </select>
+
+    <select id="listParentXmlFormatConfig" resultType="cn.les.ntfm.infoshare.entity.XmlFormatConfigDO">
+        SELECT ID,
+        PID,
+        DISPLAY_SEQ,
+        LABEL_NAME,
+        LABEL_TYPE,
+        VALUE,
+        TABLE_ID,
+        TABLE_NAME,
+        OUTPUTRELATION_ID,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME
+        FROM XMLFORMATCONFIG
+        <where>
+            <if test="labelType!=null and labelType!=''">
+                LABEL_TYPE = #{labelType}
+            </if>
+        </where>
+        START WITH ID = ${id}
+        CONNECT BY PRIOR PID = ID
+        ORDER BY LEVEL ASC
+    </select>
+    <select id="listAllXmlFormatConfigById" resultType="cn.les.ntfm.infoshare.entity.XmlFormatConfigDO">
+        SELECT ID,
+        PID,
+        DISPLAY_SEQ,
+        LABEL_NAME,
+        LABEL_TYPE,
+        VALUE,
+        TABLE_ID,
+        TABLE_NAME,
+        OUTPUTRELATION_ID,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME
+        FROM XMLFORMATCONFIG
+        <where>
+            <if test="labelType!=null and labelType!=''">
+                LABEL_TYPE = #{labelType}
+            </if>
+        </where>
+        START WITH ID = (SELECT ID FROM XMLFORMATCONFIG WHERE PID IS NULL START WITH ID = ${id} CONNECT BY PRIOR PID =
+        ID)
+        CONNECT BY PRIOR ID = PID
+    </select>
+
+    <select id="getFreemarkerUpdateTime" resultType="java.util.Date">
+        SELECT MAX(UPDATE_TIME)
+        FROM (SELECT NVL(GREATEST(T1.UPDATE_TIME, T2.UPDATE_TIME),T1.UPDATE_TIME) AS UPDATE_TIME
+              FROM XMLFORMATCONFIG T1
+              LEFT JOIN OUTPUTRELATION T2
+              ON T1.OUTPUTRELATION_ID = T2.ID
+              START WITH T1.ID = #{xmlformatId} CONNECT BY PRIOR T1.ID = T1.PID)
+    </select>
+
+</mapper>

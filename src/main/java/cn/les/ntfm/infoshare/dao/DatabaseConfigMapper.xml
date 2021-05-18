@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.DatabaseConfigMapper">
+    <insert id="addData" parameterType="cn.les.ntfm.infoshare.entity.DataBaseConfigDO">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="BEFORE">
+            SELECT (NVL(MAX(ID),0)+1) AS id FROM DATABASECONFIG
+        </selectKey>
+        INSERT INTO DATABASECONFIG (
+        ID,
+        ALL_FREQUENCY,
+        INC_FREQUENCY,
+        XMLTEMPLATE_ID,
+        XMLFORMATCONFIG_ID,
+        SPLIT_NUM,
+        BEAT_FLAG,
+        DEDUPLICATION_FLAG,
+        TABLE_ID,
+        TABLE_NAME,
+        CONDITION,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME)
+        VALUES(
+        ${id},
+        #{allFrequency},
+        #{incFrequency},
+        #{xmltemplateId},
+        #{xmlformatconfigId},
+        #{splitNum},
+        #{beatFlag},
+        #{deduplicationFlag},
+        #{tableId},
+        #{tableName},
+        #{condition},
+        'admin',
+        SYSDATE,
+        'admin',
+        SYSDATE )
+    </insert>
+
+    <delete id="deleteDataById" parameterType="java.lang.Long">
+        DELETE FROM DATABASECONFIG WHERE ID = #{id}
+    </delete>
+
+    <update id="updataDataById" parameterType="cn.les.ntfm.infoshare.entity.DataBaseConfigDO">
+        UPDATE DATABASECONFIG
+        <set>
+            ALL_FREQUENCY = #{allFrequency},
+            INC_FREQUENCY = #{incFrequency},
+            XMLTEMPLATE_ID = #{xmltemplateId},
+            XMLFORMATCONFIG_ID = #{xmlformatconfigId},
+            SPLIT_NUM = #{splitNum},
+            BEAT_FLAG = #{beatFlag},
+            DEDUPLICATION_FLAG = #{deduplicationFlag},
+            TABLE_ID = #{tableId},
+            TABLE_NAME = #{tableName},
+            CONDITION = #{condition},
+            UPDATE_USER = 'admin',
+            UPDATE_TIME = SYSDATE
+        </set>
+        WHERE ID = #{id}
+    </update>
+
+    <select id="getDataById" parameterType="java.lang.Long"
+            resultType="cn.les.ntfm.infoshare.entity.DataBaseConfigDO">
+        SELECT
+        ID,
+        ALL_FREQUENCY,
+        INC_FREQUENCY,
+        XMLTEMPLATE_ID,
+        XMLFORMATCONFIG_ID,
+        SPLIT_NUM,
+        BEAT_FLAG,
+        DEDUPLICATION_FLAG,
+        TABLE_ID,
+        TABLE_NAME,
+        CONDITION,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME
+        FROM DATABASECONFIG
+        WHERE ID = ${id}
+    </select>
+    <select id="getDataByInfoshareId" parameterType="java.lang.Long"
+            resultType="cn.les.ntfm.infoshare.entity.DataBaseConfigDO">
+        SELECT
+        T1.ID,
+        T1.ALL_FREQUENCY,
+        T1.INC_FREQUENCY,
+        T1.XMLTEMPLATE_ID,
+        T1.XMLFORMATCONFIG_ID,
+        T1.SPLIT_NUM,
+        T1.BEAT_FLAG,
+        T1.DEDUPLICATION_FLAG,
+        T1.TABLE_ID,
+        T1.TABLE_NAME,
+        T1.CONDITION,
+        T1.CREATE_USER,
+        T1.CREATE_TIME,
+        T1.UPDATE_USER,
+        T1.UPDATE_TIME
+        FROM DATABASECONFIG T1
+        INNER JOIN INFOSHARECONFIG T2
+            ON T1.ID = T2.SOURCE_ID
+        WHERE T2.ID = ${infoshareId}
+    </select>
+    <select id="listTablesByDatabaseConfigId" resultType="hashmap">
+        SELECT
+          DISTINCT( T1.TABLE_ID || T1.TABLE_NAME),
+          T1.TABLE_ID AS ID,
+          T1.TABLE_NAME AS TEXT
+        FROM DATABASECONFIG T1
+        WHERE T1.ID = ${databaseConfigId}
+      UNION ALL
+        SELECT
+          DISTINCT( T2.TABLE_ID || T2.TABLE_NAME),
+          T2.TABLE_ID AS ID,
+          T2.TABLE_NAME AS TEXT
+        FROM DATABASECONFIG T1
+        INNER JOIN DATABASERELATION T2
+        ON T1.ID = T2.DATABASECONFIG_ID
+        WHERE T1.ID = ${databaseConfigId}
+    </select>
+</mapper>

@@ -1,0 +1,62 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="include :: header">
+</head>
+<!-- 引入外联样式或脚本 -->
+
+<!-- 布局布局区 -->
+<body>
+<!--Layout-->
+<div id="layout1" class="mini-layout" style="width:100%;height:100%;">
+    <div title="center" region="center">
+        <div class="mini-toolbar" style="padding:2px;border-bottom:0;">
+            <table style="width:100%;">
+                <tr>
+                      <td style="white-space:nowrap;">
+                        <input id="search" class="mini-textbox" emptyText="请输入关键字" width="150"/>
+                        <a name="btnSearch" class="mini-button" iconCls="icon-search" plain="true">查询</a>
+
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+</div>
+<script type="text/javascript">
+    mini.parse();
+    // 变量声明区
+    btnSearch = mini.getbyName("btnSearch");
+    var btnExport = mini.getByName("btnExport");
+    var btnExport2 = mini.getByName("btnExport2");
+
+    var grid = mini.get("userGrid");
+    var search = mini.get("search");
+
+    var genders = callCodelist(ops);
+    // var genders =    [{ "id": 1, "text": "男"},{ "id": "2", "text": "女"}];
+
+    grid.setUrl("/rms/user/queryUserDataSet");//分页
+    query();
+
+    //函数定义区
+    /**
+     * 渲染性别
+     */
+    function onGenderRenderer(e) {
+
+        for (var i = 0, l = genders.length; i < l; i++) {
+            var g = genders[i];
+            if (g.id == e.value) return g.text;
+        }
+        return "";
+    }
+
+    //事件绑定区
+
+    // XX按钮 绑定 XXXX操作
+    btnAdd.on('click', add);
+
+</script>
+
+</body>
+</html>

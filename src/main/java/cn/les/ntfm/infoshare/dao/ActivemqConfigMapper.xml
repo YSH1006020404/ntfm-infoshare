@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.ActivemqConfigMapper">
+    <insert id="addData" parameterType="cn.les.ntfm.infoshare.entity.ActiveMqConfigDO">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="BEFORE">
+            SELECT (NVL(MAX(ID),0)+1) AS id FROM ACTIVEMQCONFIG
+        </selectKey>
+        INSERT INTO ACTIVEMQCONFIG (
+        ID,
+        URL,
+        USER_NAME,
+        PASSWORD,
+        PROCESS_MODE,
+        DESTINATION,
+        OBJECT_NAME,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME)
+        VALUES (
+        ${id},
+        #{url},
+        #{userName},
+        #{password},
+        #{processMode},
+        #{destination},
+        #{destination},
+        'admin',
+        SYSDATE,
+        'admin',
+        SYSDATE)
+    </insert>
+
+    <update id="updateById" parameterType="cn.les.ntfm.infoshare.entity.ActiveMqConfigDO">
+        UPDATE ACTIVEMQCONFIG
+        <set>
+            URL = #{url},
+            USER_NAME = #{userName},
+            PASSWORD = #{password},
+            PROCESS_MODE = #{processMode},
+            DESTINATION = #{destination},
+            OBJECT_NAME = #{destination},
+            UPDATE_USER = 'admin',
+            UPDATE_TIME = SYSDATE
+        </set>
+        WHERE ID = #{id}
+    </update>
+
+    <select id="getDataById" parameterType="java.lang.Long" resultType="cn.les.ntfm.infoshare.entity.ActiveMqConfigDO">
+        SELECT ID,
+               URL,
+               USER_NAME,
+               PASSWORD,
+               PROCESS_MODE,
+               DESTINATION,
+               OBJECT_NAME,
+               CREATE_USER,
+               CREATE_TIME,
+               UPDATE_USER,
+               UPDATE_TIME
+        FROM ACTIVEMQCONFIG
+        WHERE ID = #{id}
+    </select>
+</mapper>

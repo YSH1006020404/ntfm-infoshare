@@ -1,0 +1,14 @@
+[
+  {
+    "id": "yyyymmdd",
+    "text": "YYYYMMDD"
+  },
+  {
+    "id": "yyyymmddhh24mi",
+    "text": "YYYYMMDDHHMM"
+  },
+  {
+    "id": "yyyymmddhh24miss",
+    "text": "YYYYMMDDHHMMSS"
+  }
+]

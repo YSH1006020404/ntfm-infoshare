@@ -1,0 +1,12 @@
+[
+  {
+    "id": "true",
+    "value": "true",
+    "text": "是"
+  },
+  {
+    "id": "false",
+    "value": "false",
+    "text": "否"
+  }
+]

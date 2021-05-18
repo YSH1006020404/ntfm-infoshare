@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:include="include :: header"></head>
+<head>
+    <meta charset="UTF-8">
+    <title>XML模板配置</title>
+    <style>
+        body, html {
+            margin: 0px;
+            padding: 0px;
+            color: #e5e5e5;
+            background: #252727;
+        }
+
+        tr {
+            height: 45px;
+        }
+    </style>
+</head>
+<body>
+<div class="form" id="editForm">
+    <table border="0" cellpadding="1" cellspacing="2" style="width: 100%;table-layout: fixed;">
+        <input name="id" class="mini-hidden"/>
+        <input name="pid" class="mini-hidden"/>
+        <tr>
+            <td class="labelName">格式名称：</td>
+            <td class="inputText"><input style="width: 97%" class="mini-textbox" name="displayName"/></td>
+            <td class="labelName">节点名称：</td>
+            <td class="inputText"><input style="width: 97%" class="mini-textbox" vtype="maxLength:50"
+                                         errorMode="border" required="true" name="labelName"/></td>
+        </tr>
+        <tr>
+            <td class="labelName">节点类型：</td>
+            <td class="inputText"><input style="width: 97%" class="mini-combobox" required="true"
+                                         url="/mainframe/json/labelType.json" name="labelType"/></td>
+            <td class="labelName">顺序：</td>
+            <td class="inputText"><input style="width: 97%" class="mini-spinner" minValue="1" maxValue="1000"
+                                         errorMode="border" required="true" name="displaySeq"/></td>
+        </tr>
+        <tr>
+            <td class="labelName valueShow">值：</td>
+            <td class="inputText valueShow"><input style="width: 97%;" class="mini-textbox" name="value"/></td>
+        </tr>
+    </table>
+</div>
+<div style="text-align: center;padding: 10%;">
+    <a class="mini-button" style="margin-right: 10%;" id="savaData">确定</a>
+    <a class="mini-button" id="onCancel">取消</a>
+</div>
+<script>
+    mini.parse();
+    var curAction;
+    var id = null;
+    var editForm = new mini.Form("#editForm");
+
+    function SetData(data) {
+        curAction = data.action;
+        if (data.node != null && data.node != undefined) {
+            id = data.node["id"];
+        }
+        $.callJson({
+            url: "/infoshareConf/xmlTemplate/getXmlTemplateById",
+            data: {"id": id},
+            cache: false,
+            success: function (data) {
+                if (curAction == "edit") {
+                    editForm.setData(data);
+                    setHtmlByLabelType(mini.getbyName("labelType").getValue());
+                } else {
+                    //数据类型默认值
+                    mini.getbyName("labelType").select(5);
+                    if (id != null) {
+                        mini.getbyName("pid").setValue(id);
+                        mini.getbyName("displayName").setValue(data.displayName);
+                    }
+                    setHtmlByLabelType(mini.getbyName("labelType").getValue());
+                }
+            },
+            error: function (e) {
+                mini.alert("检索XML模板失败！");
+            }
+        });
+    }
+
+    function savaData() {
+        var message;
+        var data = editForm.getData();
+        editForm.validate();
+        if (editForm.isValid() == false) {
+            return;
+        }
+        if (curAction == "new") {
+            data.pid = id;
+            $.callJson({
+                url: "/infoshareConf/xmlTemplate/addXmlTemplate",
+                cache: false,
+                data: data,
+                async: false,
+                success: function (msg) {
+                    CloseWindow("save");
+                },
+                error: function (e) {
+                    mini.alert("新增XML模板失败！");
+                }
+            });
+        } else if (curAction == "edit") {
+            $.callJson({
+                url: "/infoshareConf/xmlTemplate/editXmlTemplate",
+                cache: false,
+                data: data,
+                async: false,
+                success: function (msg) {
+                    CloseWindow("save");
+                },
+                error: function (e) {
+                    mini.alert("修改XML模板失败！");
+                }
+            });
+        }
+    }
+
+    /**
+     *节点类型选择
+     */
+    function onLabelTypeChanged(e) {
+        var labelType = e.item.id;
+        setHtmlByLabelType(labelType);
+    }
+
+    /**
+     * 根据节点类型显示和隐藏界面字段
+     */
+    function setHtmlByLabelType(labelType) {
+        if (labelType == "TXT" || labelType == "SUBTYPE") {
+            $(".valueShow").show();
+        } else {
+            mini.getbyName("value").setValue("");
+            $(".valueShow").hide();
+        }
+    }
+
+    //  ====================================事件区====================================
+    //切换节点类型
+    mini.getbyName("labelType").on("itemclick", onLabelTypeChanged);
+    //保存
+    mini.get("savaData").on("click", savaData);
+    //取消
+    mini.get("onCancel").on("click", onCancel);
+</script>
+</body>
+</html>

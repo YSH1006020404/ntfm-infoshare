@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.CommonMapper">
+    <!--据主键和表名检索配置信息-->
+    <select id="getConfigurationById" resultType="hashMap">
+        SELECT *
+        FROM ${tableName}
+        WHERE ID = #{id}
+    </select>
+
+    <!--检索输出数据-->
+    <select id="listOutputData" resultType="hashMap">
+        ${listSql}
+    </select>
+
+    <!--更新C_去重表-->
+    <update id="mergeData">
+        ${mergeSql}
+    </update>
+
+    <select id="queryData" resultType="hashMap">
+        ${querySql}
+    </select>
+
+    <!--调用存储过程-->
+    <select id="callProByName" parameterType="java.lang.String" statementType="CALLABLE">
+        {call ${proName}}
+    </select>
+
+    <!--主键删除-->
+    <delete id="deleteDataById">
+        DELETE
+        FROM ${tableName}
+        WHERE ID = #{id}
+    </delete>
+
+    <!--检索指定表的所有字段-->
+    <select id="listColumns" parameterType="java.lang.String" resultType="hashmap">
+        SELECT A.COLUMN_NAME AS ID,
+               A.COLUMN_NAME AS TEXT,
+               CASE
+               WHEN A.DATA_TYPE='DATE' THEN 'DATE'
+               WHEN A.DATA_TYPE='CLOB' THEN 'CLOB'
+               ELSE 'TEXT'
+               END AS COLUMN_TYPE,
+               B.COMMENTS AS EXPLAIN
+        FROM USER_TAB_COLUMNS A
+        LEFT JOIN USER_COL_COMMENTS B
+             ON A.TABLE_NAME = B.TABLE_NAME
+             AND A.COLUMN_NAME = B.COLUMN_NAME
+        WHERE A.TABLE_NAME = #{tableName}
+    </select>
+</mapper>

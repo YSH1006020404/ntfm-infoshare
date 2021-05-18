@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.DatabaseRelationMapper">
+    <insert id="addData" parameterType="cn.les.ntfm.infoshare.entity.DataBaseRelationDO">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="BEFORE">
+            SELECT (NVL(MAX(ID),0)+1) AS id FROM DATABASERELATION
+        </selectKey>
+        INSERT INTO DATABASERELATION (
+        ID,
+        DATABASECONFIG_ID,
+        TABLE_ID,
+        TABLE_NAME,
+        BASE_TABLE_COLUMN,
+        RELATION_TABLE_COLUMN,
+        CONDITION,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME )
+        VALUES(
+        ${id},
+        #{databaseconfigId},
+        #{tableId},
+        #{tableName},
+        #{baseTableColumn},
+        #{relationTableColumn},
+        #{condition},
+        'admin',
+        SYSDATE,
+        'admin',
+        SYSDATE )
+    </insert>
+
+    <delete id="deleteDataById" parameterType="java.lang.Long">
+        DELETE
+        FROM DATABASERELATION
+        WHERE ID = #{id}
+    </delete>
+    <delete id="deleteDataByDatabaseconfigId" parameterType="java.lang.Long">
+        DELETE
+        FROM DATABASERELATION
+        WHERE DATABASECONFIG_ID = #{databaseconfigId}
+    </delete>
+
+    <update id="updataDataById" parameterType="cn.les.ntfm.infoshare.entity.DataBaseRelationDO">
+        UPDATE DATABASERELATION
+        <set>
+            DATABASECONFIG_ID = #{databaseconfigId},
+            TABLE_ID = #{tableId},
+            TABLE_NAME = #{tableName},
+            BASE_TABLE_COLUMN = #{baseTableColumn},
+            RELATION_TABLE_COLUMN = #{relationTableColumn},
+            CONDITION = #{condition},
+            UPDATE_USER = 'admin',
+            UPDATE_TIME = SYSDATE
+        </set>
+        WHERE ID = #{id}
+    </update>
+
+    <select id="getDataById" parameterType="java.lang.Long"
+            resultType="cn.les.ntfm.infoshare.entity.DataBaseRelationDO">
+        SELECT
+            ID,
+            DATABASECONFIG_ID,
+            TABLE_ID,
+            TABLE_NAME,
+            BASE_TABLE_COLUMN,
+            RELATION_TABLE_COLUMN,
+            CONDITION,
+            CREATE_USER,
+            CREATE_TIME,
+            UPDATE_USER,
+            UPDATE_TIME
+        FROM DATABASERELATION
+        WHERE ID = ${id}
+    </select>
+    <select id="listByDatabaseconfigId" parameterType="java.lang.Long"
+            resultType="cn.les.ntfm.infoshare.entity.DataBaseRelationDO">
+        SELECT
+            T1.ID,
+            T1.DATABASECONFIG_ID,
+            T1.TABLE_ID,
+            T1.TABLE_NAME,
+            T1.BASE_TABLE_COLUMN,
+            T1.RELATION_TABLE_COLUMN,
+            T1.CONDITION,
+            T1.CREATE_USER,
+            T1.CREATE_TIME,
+            T1.UPDATE_USER,
+            T1.UPDATE_TIME
+        FROM DATABASERELATION T1
+                 INNER JOIN DATABASECONFIG T2
+                            ON T1.DATABASECONFIG_ID = T2.ID
+        WHERE T2.ID = ${databaseconfigId}
+    </select>
+</mapper>

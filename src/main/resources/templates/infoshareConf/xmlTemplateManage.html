@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:include="include :: header"></head>
+<head>
+    <meta charset="UTF-8">
+    <title>XML模板</title>
+    <style>
+        body, html {
+            margin: 0px;
+            padding: 0px;
+            color: #e5e5e5;
+            background: #252727;
+        }
+
+        .mini-toolbar {
+            display: flex;
+            flex-direction: row;
+            position: relative;
+            height: 45px;
+        }
+
+        .mini-button {
+            margin-right: 5px;
+        }
+
+        .mini-treegrid {
+            border: solid 1px #3e4140;
+            position: relative;
+            height: 90%;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <div class="mini-toolbar">
+        <table>
+            <tr>
+                <td><a class="mini-button" id="copyTemplate">复制模板</a></td>
+                <td><a class="mini-button" id="addTemplate">增加</a></td>
+                <td><a class="mini-button" id="deleteTemplate">删除</a></td>
+            </tr>
+        </table>
+    </div>
+    <div id="treegrid" class="mini-treegrid" showTreeIcon="false" showCheckBox="true" autoCheckParent="false"
+         checkRecursive="false" treeColumn="displayName" resultAsTree="false" expandOnLoad="true">
+        <div property="columns">
+            <div type="indexcolumn" width="3%" headerAlign="center">序号</div>
+            <div name="displayName" width="20%" field="displayName" headerAlign="center">格式名称</div>
+            <div field="labelName" width="20%" headerAlign="center">节点名称</div>
+            <div field="labelType" width="15%" headerAlign="center">节点类型</div>
+            <div field="displaySeq" width="3%" headerAlign="center" align="center">顺序</div>
+            <div field="value" width="10%" headerAlign="center">值</div>
+            <div field="operate" width="10%" headerAlign="center" align="center" renderer="onRenderer">操作</div>
+        </div>
+    </div>
+</div>
+<div style="text-align:center;padding:5px;">
+    <a class="mini-button" id="onCancel" style="margin-right:20px;">关闭</a>
+</div>
+<script>
+    //    ------------------------------------------------变量定义区-------------------------------
+    mini.parse();
+    var xmlTreeGrid = mini.get("treegrid");
+
+    //    ------------------------------------------------自定义函数定义区--------------------------
+    $(function (e) {
+        loadTreeGridData();
+    });
+
+    //XML模板加载
+    function loadTreeGridData() {
+        $.callJson({
+            url: '/infoshareConf/xmlTemplate/queryXmlTemplate',
+            data: {"id": ""},
+            type: 'get',
+            success: function (data) {
+                xmlTreeGrid.loadList(data, "id", "pid");
+            },
+            error: function (e) {
+                mini.alert("检索XML模板失败！");
+            }
+        });
+    }
+
+    //XML模板复制
+    function copyTemplate() {
+        var nodes = xmlTreeGrid.getCheckedNodes();
+        // 记载pid为空的数量
+        var pidCount = 0;
+        if (nodes.length > 0) {
+            var ids = [];
+            for (var i = 0; i < nodes.length; i++) {
+                ids[i] = nodes[i].id;
+                if (nodes[i].pid == undefined) {
+                    pidCount++;
+                }
+            }
+            if (pidCount > 1) {
+                mini.alert("只能选择一个完整的格式！");
+            } else if (pidCount < 1) {
+                mini.alert("请选择完整的格式！");
+            } else {
+                $.callJson({
+                    url: "/infoshareConf/xmlTemplate/copyXmlTemplate",
+                    cache: false,
+                    data: {"ids": ids},
+                    async: false,
+                    success: function (data) {
+                        loadTreeGridData();
+                    },
+                    error: function (e) {
+                        mini.alert("复制XML模板失败！");
+                    }
+                });
+            }
+        } else {
+            mini.alert("请选择要复制的XML模板！");
+        }
+    }
+
+    //XML模板新增
+    function addTemplate() {
+        var nodes = xmlTreeGrid.getCheckedNodes();
+        if (nodes.length > 1) {
+            mini.alert("不允许选择多个节点新增！");
+            return;
+        }
+        if (nodes.length == 1 && listAffectedLinks(nodes[0].id)) {
+            return;
+        }
+        mini.open({
+            url: "xmlTemplate.html",
+            title: "新增XML模板",
+            width: 930,
+            height: 350,
+            onload: function () {
+                var iframe = this.getIFrameEl();
+                var data = {action: "new", node: nodes[0]};
+                iframe.contentWindow.SetData(data);
+            },
+            ondestroy: function (action) {
+                if (action == "save") {
+                    loadTreeGridData();
+                }
+            }
+        });
+    }
+
+    //XML模板删除
+    function deleteTemplate() {
+        var nodes = xmlTreeGrid.getCheckedNodes();
+        if (nodes.length > 0) {
+            var ids = [];
+            for (var i = 0; i < nodes.length; i++) {
+                if (listAffectedLinks(nodes[i].id)) {
+                    return;
+                }
+                ids[i] = nodes[i].id;
+            }
+            mini.confirm("确定删除该节点及其子节点配置?", "提醒", function (action) {
+                if (action == "ok") {
+                    $.callJson({
+                        url: "/infoshareConf/xmlTemplate/deleteXmlTemplate",
+                        cache: false,
+                        data: {"ids": ids},
+                        async: false,
+                        success: function (data) {
+                            loadTreeGridData();
+                        },
+                        error: function (e) {
+                            mini.alert("删除XML模板失败！");
+                        }
+                    });
+                }
+            });
+        } else {
+            mini.alert("请先选择要删除的模板!");
+        }
+    }
+
+    //编辑操作
+    function operateXML() {
+        var node = xmlTreeGrid.getSelectedNode();
+        if (listAffectedLinks(node.id)) {
+            return;
+        }
+        mini.open({
+            url: "xmlTemplate.html",
+            title: "修改XML模板",
+            width: 930,
+            height: 350,
+            onload: function () {
+                var iframe = this.getIFrameEl();
+                var data = {action: "edit", node: node};
+                iframe.contentWindow.SetData(data);
+            },
+            ondestroy: function (action) {
+                if (action == "save") {
+                    mini.alert("修改成功!");
+                    loadTreeGridData();
+                }
+            }
+        });
+    }
+
+    //编辑操作
+    function onRenderer(e) {
+        var s = '<a class="mini-button" style="padding:2px 5px;" href="javascript:operateXML()">编辑</a>';
+        return s;
+    }
+
+    function listAffectedLinks(id) {
+        var result = false;
+        $.callJson({
+            url: '/infoshareConf/xmlTemplate/listAffectedLinks',
+            data: {"id": id},
+            async: false,
+            type: 'get',
+            success: function (data) {
+                if (data != null && data.length > 0) {
+                    var affectedLinks = "";
+                    for (var i = 0; i < data.length; i++) {
+                        affectedLinks = affectedLinks + data[i].id + " ";
+                    }
+                    mini.alert("链路" + affectedLinks + "已绑定该模板，不允许增删改操作！")
+                    result = true;
+                }
+            },
+            error: function (e) {
+                mini.alert("获取已关联该模板的链路败！");
+            }
+        });
+        return result;
+    }
+
+    //  ====================================事件区====================================
+    //增加标签
+    mini.get("copyTemplate").on("click", copyTemplate);
+    //编辑标签
+    mini.get("addTemplate").on("click", addTemplate);
+    //删除标签
+    mini.get("deleteTemplate").on("click", deleteTemplate);
+    //关闭
+    mini.get("onCancel").on("click", onCancel);
+</script>
+</body>
+</html>

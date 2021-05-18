@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.SerialNumberMapper">
+    <select id="queryData" resultType="Map">
+        select LINKID, SEND_TIME, SEND_COUNTER
+        from SERIALNUMBERCONFIG
+        where LINKID = #{linkid}
+    </select>
+
+    <insert id="insertData" parameterType="map">
+        insert into SERIALNUMBERCONFIG
+            (LINKID, SEND_TIME, SEND_COUNTER)
+        values
+            (#{linkid}, #{sendTime}, #{sendCounter})
+    </insert>
+
+    <update id="updateData" parameterType="map">
+        update SERIALNUMBERCONFIG
+        set SEND_TIME    = #{sendTime},
+            SEND_COUNTER = #{sendCounter}
+        where LINKID = #{linkid}
+    </update>
+
+    <delete id="deleteDataById" parameterType="java.lang.Long">
+        DELETE
+        FROM SERIALNUMBERCONFIG
+        WHERE LINKID = #{linkid}
+    </delete>
+</mapper>

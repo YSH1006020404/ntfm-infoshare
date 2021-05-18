@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:include="include :: header" ></head>
+<head>
+    <meta charset="UTF-8">
+    <title>信息共享测试界面</title>
+
+    <link rel="stylesheet" type="text/css" href="/common/css/les_miniui.css"/>
+    <script type="text/javascript" src="/common/js/constants.js"></script>
+
+    <style>
+        body, html {
+            margin: 0px;
+            padding: 0px;
+            color: #e5e5e5;
+            background: #252727;
+        }
+
+        input {
+            outline: none;
+            border: 1px solid #29817e;
+        }
+
+        .title {
+            padding-left: 10px;
+            width: calc(100% - 10px);
+            height: 60px;
+            background-color: #285550;
+            color: #f5f5f5;
+            font-size: 20px;
+            line-height: 60px;
+            font-family: "Microsoft YaHei UI";
+        }
+
+        .content {
+            padding: 10px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #e5e5e5;
+        }
+
+        .Edit_Button {
+            border: 1px solid #999;
+            padding: 2px 5px;
+            -webkit-border-radius: 2px;
+            -moz-border-radius: 2px;
+            border-radius: 2px;
+        }
+
+        .Edit_Button :hover {
+            background-color: #666;
+        }
+
+        .search_btn {
+            background: #456b68;
+            border: #3f6f6d 1px solid;
+            margin-right: 5px;
+        }
+
+
+    </style>
+</head>
+<body>
+<div id="title" class="title">信息共享测试界面</div>
+<div class="content">
+
+    <div style="padding-bottom:10px; float: left;">
+
+        <a  class="mini-button" onclick="schOper()"><span id="schOper"></span></a>
+    </div>
+</div>
+
+<script type="text/javascript">
+    mini.parse();
+    //界面显示值与数据库中oper值的对应关系
+    var map={"cancelPause":constants.PAUSETXT,"pause":constants.CANCELPAUSETXT};
+
+    initSchOper();
+
+
+
+
+    function initSchOper(){
+        $.callJson({
+            url: "/infoshareConf/infoshare/queryInstance",
+            success: function (data) {
+                if(data.data["oper"]==constants.PAUSE){
+                    $("#schOper").html(constants.CANCELPAUSETXT);
+                }else {
+                    $("#schOper").html(constants.PAUSETXT);
+                }
+
+            }
+        });
+    }
+
+    //任务管理器操作
+    function schOper(){
+        $.callJson({
+            url: '/infoshareConf/infoshare/queryInstance',
+            type: 'post',
+            success: function (data) {
+
+                if(map[data.data["oper"]]==$("#schOper").html() || map[data.data["oper"]]==undefined){
+                    if($("#schOper").html()==constants.PAUSETXT){
+
+                        $.callJson({
+                            url: '/infoshareConf/infoshare/closeSch',
+                            type: 'post',
+                            data:{"oper":constants.PAUSE},
+                            success: function (data) {
+                                $("#schOper").html(constants.CANCELPAUSETXT);
+                            },
+                            error: function (e) {
+                                console.error(e);
+                            }
+                        });
+                    }else if($("#schOper").html()==constants.CANCELPAUSETXT){
+                        $.callJson({
+                            url: '/infoshareConf/infoshare/openSch',
+                            type: 'post',
+                            data:{"oper":constants.CANCELPAUSE},
+                            success: function (data) {
+                                $("#schOper").html(constants.PAUSETXT);
+
+                            },
+                            error: function (e) {
+                                console.error(e);
+                            }
+                        });
+
+                    }
+                }else{
+                    mini.alert("按钮状态过期，请刷新!");
+                }
+
+            },
+            error: function (e) {
+                console.error(e);
+            }
+        });
+    }
+
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.CheckConnMapper">
+    <select id="queryInstances" resultType="cn.les.ntfm.infoshare.entity.CheckConnDo">
+        SELECT * from CHECKCONN
+    </select>
+
+    <select id="queryInstance" parameterType="String" resultType="cn.les.ntfm.infoshare.entity.CheckConnDo">
+        SELECT * from CHECKCONN where host=#{host}
+    </select>
+
+    <update id="initInstance" parameterType="String">
+	  merge into CHECKCONN p using (select count(1) cnt from CHECKCONN where host=#{host}) np on (np.cnt>0)
+        when matched then
+        update set p.conn = 0,p.check_time=sysdate where host=#{host}
+        when not matched then
+        insert (host,conn,check_time) values(#{host}, 0, sysdate)
+      </update>
+
+
+    <update id="updateCheckConn" >
+        update  CHECKCONN set conn = conn+#{inc},CHECK_TIME=SYSDATE  where host=#{host}
+    </update>
+
+    <update id="updateCheckTime" parameterType="String">
+
+        update CHECKCONN set CHECK_TIME=SYSDATE where host=#{host}
+
+    </update>
+
+    <update id="updateOper" parameterType="String">
+
+        update CHECKCONN set oper=#{oper} where host=#{host}
+
+    </update>
+
+
+</mapper>

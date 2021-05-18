@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.InfoShareConfigurationMapper">
+    <insert id="addData" parameterType="cn.les.ntfm.infoshare.entity.InfoshareConfigDO">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="BEFORE">
+            SELECT (NVL(MAX(ID),0)+1) AS id FROM INFOSHARECONFIG
+        </selectKey>
+        INSERT INTO INFOSHARECONFIG (
+        ID,
+        INTERACTION_MARK,
+        COMPANY_NAME,
+        INTERACTION_TYPE,
+        STATE_FLAG,
+        SOURCE_TYPE,
+        SOURCE_ID,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME)
+        VALUES (
+        #{id},
+        #{interactionMark},
+        #{companyName},
+        #{interactionType},
+        #{stateFlag},
+        #{sourceType},
+        #{sourceId},
+        'admin',
+        SYSDATE,
+        'admin',
+        SYSDATE)
+    </insert>
+
+    <update id="updateDataById" parameterType="cn.les.ntfm.infoshare.entity.InfoshareConfigDO">
+        UPDATE INFOSHARECONFIG
+        <set>
+            INTERACTION_MARK = #{interactionMark},
+            COMPANY_NAME = #{companyName},
+            INTERACTION_TYPE = #{interactionType},
+            STATE_FLAG = #{stateFlag},
+            SOURCE_TYPE = #{sourceType},
+            SOURCE_ID = #{sourceId},
+            UPDATE_TIME = SYSDATE
+        </set>
+        WHERE ID = #{id}
+    </update>
+
+    <delete id="deleteDataById" parameterType="java.lang.Long">
+        DELETE
+        FROM INFOSHARECONFIG
+        WHERE ID = #{id}
+    </delete>
+
+    <select id="getDataById" parameterType="java.lang.Long" resultType="cn.les.ntfm.infoshare.entity.InfoshareConfigDO">
+        SELECT ID,
+               INTERACTION_MARK,
+               COMPANY_NAME,
+               INTERACTION_TYPE,
+               STATE_FLAG,
+               SOURCE_TYPE,
+               SOURCE_ID,
+               CREATE_USER,
+               CREATE_TIME,
+               UPDATE_USER,
+               UPDATE_TIME
+        FROM INFOSHARECONFIG
+        WHERE ID = #{id}
+    </select>
+    <select id="listInfoShareConfigurations" resultType="cn.les.ntfm.infoshare.entity.InfoshareConfigDO"
+            parameterType="cn.les.ntfm.infoshare.entity.InfoshareConfigDO">
+        SELECT ID,
+        INTERACTION_MARK,
+        COMPANY_NAME,
+        INTERACTION_TYPE,
+        STATE_FLAG,
+        SOURCE_TYPE,
+        SOURCE_ID,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME
+        FROM INFOSHARECONFIG
+        <where>
+            SOURCE_TYPE = 4
+            <if test="stateFlag!=null">
+                AND STATE_FLAG = #{stateFlag}
+            </if>
+        </where>
+    </select>
+
+    <!--首页链路列表检索-->
+    <select id="listMsgs" resultType="hashmap">
+        SELECT T1.ID,
+        T1.INTERACTION_MARK,
+        T1.COMPANY_NAME,
+        T1.STATE_FLAG,
+        T1.SOURCE_TYPE,
+        T1.SOURCE_ID,
+        T2.XMLFORMATCONFIG_ID,
+        T2.TABLE_NAME,
+        T2.BEAT_FLAG,
+        T2.DEDUPLICATION_FLAG,
+        T3.DESTINATIONS
+        FROM INFOSHARECONFIG T1
+        LEFT JOIN DATABASECONFIG T2
+        ON T1.SOURCE_ID = T2.ID
+        AND T1.SOURCE_TYPE = 4
+        LEFT JOIN (SELECT INFOSHARECONFIG_ID,
+                          LISTAGG(ID, ',') WITHIN GROUP(ORDER BY ID ASC) AS DESTINATIONS
+                   FROM DESTINATIONCONFIG GROUP BY INFOSHARECONFIG_ID) T3
+        ON T1.ID = T3.INFOSHARECONFIG_ID
+        <where>
+            <if test="interactionMark!=null and interactionMark !=''">
+                AND ( T1.INTERACTION_MARK LIKE '%${interactionMark}%')
+            </if>
+            <if test="companyName!=null and companyName !='' ">
+                AND ( T1.COMPANY_NAME LIKE '%${companyName}%')
+            </if>
+            <if test="stateFlag!=null and stateFlag !=''">
+                AND ( T1.STATE_FLAG=#{stateFlag})
+            </if>
+        </where>
+        ORDER BY T1.ID DESC
+    </select>
+
+    <!--链路状态-->
+    <select id="listMonitorLinks" resultType="cn.les.ntfm.infoshare.dto.MonitorLinkStatus">
+        SELECT T1.ID AS LINK_STATUS,
+               (CASE WHEN T1.STATE_FLAG = 1 AND T2.STATUS_FLAG = 1 THEN 1
+                ELSE 0 END) AS ADMIN_STATUS,
+               T2.ID AS LOGIC_NUMBER,
+               NVL(T3.STATISTICS_COUNT,0) AS SEND_COUNT
+        FROM INFOSHARECONFIG T1
+        INNER JOIN DESTINATIONCONFIG T2
+          ON T1.ID = T2.INFOSHARECONFIG_ID
+        LEFT JOIN LINKSTATISTICS T3
+          ON T1.ID = T3.INFOSHARECONFIG_ID
+          AND T2.ID = T3.DESTINATIONCONFIG_ID
+          AND T3.STATISTICS_TIME = #{currentTime}
+    </select>
+</mapper>

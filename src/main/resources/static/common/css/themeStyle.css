@@ -1,0 +1,614 @@
+/**************************************** 主题样式 ****************************************/
+/**************************************** 含!important的为必须加的地方 ****************************************/
+label {
+    font-size: 16px;
+    color: #fff;
+}
+
+select {
+    font-size: 14px;
+}
+
+.theme-left {
+    position: relative;
+    box-sizing: border-box;
+    width: 50%;
+    height: 100%;
+}
+
+/* theme模块样式 */
+.theme-modual {
+    position: relative;
+    box-sizing: border-box;
+    margin: 10px;
+    border:1px solid rgb(24,93,75);
+    box-shadow:inset 0 0 10px rgba(24,93,75,.9);
+    background: #272b2b;
+}
+
+/* 模块标题 */
+.theme-modual-tit {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    padding: 0 24px;
+    font-size: 18px;
+    color: #fff;
+    border-bottom: 1px solid rgb(15,147,110);
+    background:url("/common/img/modual-tit-bk.jpg") 0 0 no-repeat;
+    background-color: rgba(42,56,57,1);
+}
+
+/* 模块内容 */
+.theme-modual-cont {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    height: calc(100% - 40px);
+    padding: 20px;
+}
+
+/* 模块内部细分标题 */
+.theme-modual-innerTit {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    height: 20px;
+    line-height: 20px;
+    font-size: 16px;
+    color: #fff;
+    float: left;
+}
+
+.theme-input {
+    width: 100%;
+    height: auto;
+    float: left;
+    padding-bottom: 10px;
+}
+
+/* 模块内部细分标题统一装饰物 */
+.theme-modual-innerTit em.tit-icon {
+    display: inline-block;
+    width: 4px;
+    height: 100%;
+    background: #10eeb2;
+}
+
+/* 模块内部细分标题文字 */
+.theme-modual-innerTit .tit-txt {
+    display: inline-block;
+    margin-left: 15px;
+    vertical-align: top;
+}
+
+/* 模块内部内容区域 */
+.theme-modual-inner {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 20px 0;
+}
+
+/*class:echarts 为theme例子，实际项目自行写样式*/
+.theme-echarts {
+    background: rgb(30,34,35);
+    width:100%;
+    height: calc(100% - 20px);
+}
+
+.input-label {
+    color: #fff;
+    font-size: 16px;
+}
+
+/**************************************** MINIUI样式设置 ****************************************/
+.mini-popup {
+    border-color: #476b6b;
+}
+
+/* miniui 文本输入框 */
+.mini-textbox, .mini-textboxlist {
+    height: 32px;
+}
+
+.mini-textbox-border, .mini-buttonedit-border, .mini-textboxlist .mini-textboxlist-border {
+    height: 30px;
+    font-size: 14px;
+    border: 1px solid rgb(35,90,84);
+    border-radius: 0;
+    background: rgb(38,40,39);
+}
+
+.mini-textbox.mini-textbox-focus, .mini-buttonedit.mini-buttonedit-focus, .mini-textboxlist.mini-textboxlist-focus {
+    outline:none;
+}
+
+.mini-textbox-input, .mini-buttonedit-input{
+    height: 30px;
+    line-height: 20px;
+    color: #fff;
+    font-size: 14px;
+}
+
+/* miniui buttonedit输入框 */
+.mini-buttonedit {
+    height: 32px;
+    border: 1px solid #476b6b;
+    background: #353e3e;
+}
+
+.mini-buttonedit-button {
+    height: 20px;
+    margin-top: 3px;
+    background: #353e3e;
+    border: 1px solid #476b6b;
+}
+
+.mini-buttonedit-close {
+    height: 26px;
+}
+
+.mini-buttonedit-button-pressed, .mini-buttonedit-up-pressed,
+.mini-buttonedit-down-pressed, .mini-buttonedit-popup,
+.mini-buttonedit-button-hover, .mini-buttonedit-hover .mini-buttonedit-trigger {
+    background: #598e87;
+    border: 1px solid #5cd4c5;
+}
+
+.mini-textbox-focus .mini-textbox-border, .mini-textboxlist-focus .mini-textboxlist-border {
+    border-color: #63b0a6;
+    background: #293131;
+}
+
+.mini-buttonedit-up span {
+    background: url("/common/img/iconfont/up.png") no-repeat 50% 0px;
+}
+
+.mini-buttonedit-down span {
+    background: url("/common/img/iconfont/down.png") no-repeat 50% -2px;
+}
+
+.mini-buttonedit-up, .mini-buttonedit-down {
+    background: #353e3e;
+    border: 1px solid #476b6b;
+}
+.mini-buttonedit-icon {
+    width: 16px;
+    height: 16px;
+    background: url(/common/img/iconfont/editicon.png) no-repeat right 0 !important;
+}
+
+.mini-popupedit .mini-buttonedit-icon {
+    background: url("/common/img/iconfont/down.png") no-repeat 50% -2px !important;
+    margin-top: -2px;
+}
+
+.mini-buttonedit-popup .mini-buttonedit-trigger {
+    margin-top: 3px;
+}
+
+/* miniui按钮 */
+.mini-button {
+    box-sizing: border-box;
+    background: rgb(39,68,63);
+    border: 1px solid rgb(35,90,84);
+    border-radius: 2px;
+    font-size: 16px;
+    color:#fff;
+    height: 32px;
+    line-height: 32px;
+}
+
+.btn-normal {
+    width:120px;
+}
+
+.mini-button-text {
+    line-height: 26px;
+}
+
+.mini-button:hover {
+    border: 1px solid rgb(25,203,171) !important;
+    background: radial-gradient(rgba(25,203,171,.1),rgba(25,203,171,.6)) !important;
+    color: #f3f0ef !important;
+}
+
+.mini-messagebox-buttons .mini-button {
+    border-radius: 5px;
+    margin-bottom: 3px;
+    font-size: 16px;
+    height: 24px;
+    line-height: 24px;
+}
+
+.mini-messagebox-buttons .mini-button-text {
+    height: 21px;
+    line-height: 21px;
+}
+
+/* 自定义checkbox,radio */
+.mini-radiobuttonlist table label {
+    font-size: 16px;
+}
+
+.mini-checkboxlist-item,.mini-radiobuttonlist-item {
+    position: relative;
+}
+
+.mini-list-icon,.mini-checkboxlist input[type='checkbox'],.mini-checkbox input[type='checkbox'],.mini-radiobuttonlist input[type='radio'],.mini-radiobutton input[type='radio']{
+    opacity:0;
+    margin-right: 2px;
+}
+
+input[type='checkbox']+label:before, input[type='radio']+label:before{
+    content: '';
+    position: absolute;
+    left: 0px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    background: #598d88;
+    transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+}
+
+input[type='checkbox']+label:after, input[type='radio']+label:after {
+    content: '';
+    position: absolute;
+    transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+}
+
+input[type='checkbox']:checked+label:before {
+    background: #598d88;
+    border-color: #598d88;
+}
+
+input[type='checkbox']:checked+label:after {
+    border-right: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+}
+
+input[type='checkbox']:hover+label:before {
+    background: #598d88;
+    border-color: #598d88;
+}
+
+input[type='checkbox']+label:before {
+    border-radius: 2px;
+}
+
+input[type='checkbox']+label:after {
+    left: 4px;
+    top: 4px;
+    width: 4px;
+    height: 8px;
+    border: 0;
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+}
+
+input[type='radio']+label:before {
+    top:4px;
+    border-radius: 50%;
+}
+
+input[type='radio']+label:after {
+    left: 4px;
+    top: 8px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: transparent;
+}
+
+input[type='radio']:checked+label:before {
+    border:1px solid #598d88;
+}
+
+input[type='radio']:checked+label:after {
+    background:#fff;
+}
+
+input[type='radio']:hover+label:before {
+    background: #a8adb4;
+}
+
+/* miniui listbox */
+.mini-listbox-item td {
+    background: #2c302f;
+    color: #fff;
+}
+
+.mini-listbox td {
+    font-size: 13px;
+}
+
+.mini-listbox-border {
+    border: 1px solid #476b6b;
+    background: #353e3e;
+}
+
+.mini-listbox-item-hover td {
+    background: #598e87;
+    border-color: #598d88;
+}
+
+/* miniui textboxlist */
+.mini-textboxlist .mini-textboxlist-input {
+    height: 24px;
+    line-height: 24px;
+    color: #fff;
+    font-size: 14px;
+}
+
+.mini-textboxlist .mini-textboxlist-item {
+    border: rgb(32,67,61);
+    background: rgb(32,67,61);
+    cursor: pointer;
+    height: 20px;
+    line-height: 20px;
+    color: #fff;
+    font-size: 14px;
+    margin-top: 3px;
+    margin-bottom: 0px;
+}
+
+/* miniui datagrid */
+.theme-grid {
+    width: 100%;
+    height: 400px;
+}
+
+.mini-grid-border {
+    border-color: #344c4a;
+}
+
+.mini-grid-headerCell {
+    box-sizing: border-box;
+    color: #fff;
+    font-size: 14px;
+    height: 42px;
+    background: rgb(36,65,61) !important;
+}
+
+.mini-grid-rows-view {
+    background: rgb(39,43,44);
+}
+
+.mini-grid-cell-inner, .mini-grid-headerCell-inner{
+    height: 42px;
+    line-height: 42px;
+}
+
+.mini-grid-cell {
+    box-sizing: border-box;
+    border-color: #344c4a;
+    color: #fff;
+    font-size: 14px;
+}
+
+.mini-grid-table tr:nth-child(odd) td{
+    background: rgb(44,48,49);
+}
+
+.mini-grid-table tr:nth-child(even) td{
+    background: rgb(39,43,44);
+}
+
+.mini-grid-headerCell, .mini-grid-topRightCell, .mini-grid-columnproxy {
+    border-color: #344c4a;
+    background: rgb(36,65,61);
+}
+
+.mini-grid-row td{
+    border-top:1px solid  transparent;
+    border-bottom:1px solid  transparent;
+}
+
+.mini-grid-row-hover td{
+    border-top:1px solid  rgb(56,89,80);
+    border-bottom:1px solid  rgb(56,89,80);
+    background: #26332f !important;
+}
+
+.mini-grid-row-hover td:nth-of-type(2){
+    border-left:1px solid  rgb(56,89,80);
+}
+
+.mini-grid-row-hover td:last-of-type{
+    border-right:1px solid  rgb(56,89,80);
+}
+
+.mini-grid-row-selected td{
+    border-top:1px solid  rgb(57,139,116);
+    border-bottom:1px solid  rgb(57,139,116);
+    background: #2b3c37 !important;
+}
+
+.mini-grid-row-selected td:nth-of-type(2){
+    border-left:1px solid rgb(57,139,116);
+}
+
+.mini-grid-row-selected td:last-of-type{
+    border-right:1px solid rgb(57,139,116);
+}
+
+.mini-grid-pager {
+    background: #384848;
+    color: #fff;
+}
+
+.mini-pager {
+    background: #334342;
+    border: 1px solid #4f615e;
+}
+
+.mini-pager .mini-button {
+    height: 22px;
+}
+
+.mini-pager-left, .mini-pager-right {
+    font-size: 14px;
+}
+
+.mini-pager-size .mini-combobox {
+    border-width: 1px;
+    width: 60px;
+}
+
+body .mini-pager-size .mini-buttonedit .mini-buttonedit-border {
+    border: 1px solid #476b6b;
+    background: #353e3e;
+    margin: 1px 0px;
+    height: 22px;
+}
+
+.mini-pager-size .mini-buttonedit .mini-buttonedit-border .mini-buttonedit-input {
+    height: 22px;
+}
+
+.mini-pager-size .mini-buttonedit .mini-buttonedit-border .mini-buttonedit-button {
+    margin-top: 1px;
+    height: 16px;
+}
+
+.mini-pager-pages {
+    color: #fff;
+}
+
+/* 点击单元格变色 - 暂时不需要 */
+/*.mini-grid-row-selected .mini-grid-cell-selected {
+    background: rgb(39,57,57) !important;
+}*/
+
+/* grid editor */
+.mini-grid-editwrap .mini-textbox-border{
+    background:rgb(39,57,57) ;
+}
+
+.mini-grid-editwrap .mini-textbox-border:focus{
+    outline: none;
+}
+
+.mini-grid-editwrap .mini-textbox-input {
+    font-size: 14px;
+    outline: none;
+}
+
+/* 日期控件 */
+.les-datepicker-select .mini-buttonedit-trigger .mini-buttonedit-icon {
+    margin-top: -7px;
+}
+
+.les-datepicker-select .mini-buttonedit-popup .mini-buttonedit-trigger {
+    margin-top: 3px;
+}
+
+/* 提示框 */
+.mini-panel-header-inner {
+    background: #506d69;
+    border: #63b0a6;
+    color: #fff;
+    font-size: 14px;
+}
+
+.mini-panel .mini-panel-body {
+    background: #384848 !important;
+}
+
+.mini-messagebox-content-text {
+    color: #fff;
+    padding-right: 0px;
+}
+
+.mini-messagebox-content td {
+    font-size: 14px;
+}
+
+.mini-messagebox-buttons .mini-button {
+    background: #384848!important;
+    border: 1px solid #476b6b!important;
+    margin-bottom: 3px;
+}
+
+.mini-window-drag .mini-panel-border {
+    border: 0;
+}
+
+.mini-modal {
+    background: transparent;
+}
+
+/* miniui htmlfile */
+.mini-htmlfile .mini-buttonedit-button {
+    height: 20px;
+    margin-top: 4px;
+    background: #353e3e;
+    border: 1px solid #476b6b;
+    color: #fff;
+}
+
+/*自定义滚动条*/
+::-webkit-scrollbar { /*整体样式*/
+    width:8px;
+    height:8px;
+    background-color:rgb(12,14,13);
+}
+
+::-webkit-scrollbar-track-piece { /*不含滑块的轨道区*/
+    background-color:rgb(12,14,13);
+}
+
+::-webkit-scrollbar-track {/*轨道*/
+    border-radius:10px;
+    background-color:rgb(12,14,13);
+}
+
+::-webkit-scrollbar-thumb {/*滑块*/
+    border-radius:10px;
+    background-color:#4b6461;
+}
+
+::-webkit-scrollbar-thumb:hover {/*滑块*/
+    background-color:#7dbbb3;
+}
+
+::-webkit-scrollbar-thumb:focus,::-webkit-scrollbar-thumb:active {/*滑块*/
+    border-radius:10px;
+    background-color:#77d2c6;
+}
+
+::-webkit-scrollbar-button {/*两端小方块*/
+    background-color:rgb(12,14,13);
+}
+
+::-webkit-scrollbar-corner{/*两端小方块交汇处*/
+    background-color:rgb(12,14,13);
+}
+
+/*且或按钮样式*/
+.mini-addorcheckbox {
+    line-height: 32px;
+    height: 32px;
+}
+
+.mini-addorcheckbox label.custom-checkbox:before {
+    height: 20px !important;
+    background: #12201E !important;
+    border: 1px solid #26877a;
+}
+
+.mini-addorcheckbox label.custom-checkbox:after {
+    width: 18px;
+    height: 18px;
+    top: 6px;
+    background: #549189;
+}

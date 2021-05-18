@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.XmlTemplateMapper">
+    <!--新增-->
+    <insert id="addData" parameterType="cn.les.ntfm.infoshare.entity.XmlTemplateDO">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="BEFORE">
+            SELECT (NVL(MAX(ID),0)+1) AS id FROM XMLTEMPLATE
+        </selectKey>
+        INSERT INTO XMLTEMPLATE
+        (ID, PID, DISPLAY_NAME, LABEL_NAME, LABEL_TYPE, DISPLAY_SEQ, VALUE, CREATE_USER, CREATE_TIME, UPDATE_USER, UPDATE_TIME)
+        VALUES
+        (#{id}, #{pid}, #{displayName}, #{labelName}, #{labelType}, #{displaySeq}, #{value}, 'admin', SYSDATE,'admin', SYSDATE)
+    </insert>
+
+    <!--主键修改-->
+    <update id="updateDataById" parameterType="cn.les.ntfm.infoshare.entity.XmlTemplateDO">
+        UPDATE XMLTEMPLATE
+        <set>
+            PID = #{pid},
+            DISPLAY_NAME = #{displayName},
+            LABEL_NAME = #{labelName},
+            LABEL_TYPE = #{labelType},
+            DISPLAY_SEQ = #{displaySeq},
+            VALUE = #{value},
+            UPDATE_USER = 'admin',
+            UPDATE_TIME = SYSDATE
+        </set>
+        WHERE ID = #{id}
+    </update>
+
+    <!--主键检索-->
+    <select id="getDataById" parameterType="java.lang.Long" resultType="cn.les.ntfm.infoshare.entity.XmlTemplateDO">
+        SELECT ID,
+               PID,
+               LABEL_NAME,
+               DISPLAY_SEQ,
+               LABEL_TYPE,
+               VALUE,
+               DISPLAY_NAME,
+               CREATE_USER,
+               CREATE_TIME,
+               UPDATE_USER,
+               UPDATE_TIME
+        FROM XMLTEMPLATE
+        WHERE ID = #{id}
+    </select>
+
+    <!--删除本级及下级节点-->
+    <delete id="deleteDataByPid" parameterType="java.lang.Long">
+        DELETE
+        FROM XMLTEMPLATE
+        WHERE ID IN (
+            SELECT ID
+            FROM XMLTEMPLATE
+            START WITH ID = #{id}
+            CONNECT BY PRIOR ID=PID
+        )
+    </delete>
+
+    <!--获取所有xml配置信息-->
+    <select id="listXmlTemplate" parameterType="java.lang.Long"
+            resultType="cn.les.ntfm.infoshare.entity.XmlTemplateDO">
+        SELECT ID,
+        PID,
+        LABEL_NAME,
+        DISPLAY_SEQ,
+        LABEL_TYPE,
+        VALUE,
+        DISPLAY_NAME,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME
+        FROM XMLTEMPLATE
+        <choose>
+            <when test="id !=null and id != ''">
+                START WITH ID = #{id} CONNECT BY PRIOR ID = PID
+                ORDER SIBLINGS BY DISPLAY_SEQ ASC
+            </when>
+            <otherwise>
+                ORDER BY DISPLAY_SEQ ASC
+            </otherwise>
+        </choose>
+    </select>
+
+    <!--获取XML配置文件列表-->
+    <select id="listJsonData" parameterType="java.lang.Long" resultType="hashMap">
+        SELECT ID,
+        DISPLAY_NAME AS TEXT
+        FROM XMLTEMPLATE
+        <where>
+            <choose>
+                <when test="id !=null and id != ''">ID = #{id}</when>
+                <otherwise>PID IS NULL</otherwise>
+            </choose>
+        </where>
+    </select>
+
+    <!--获取下一层子节点-->
+    <select id="listByPid" parameterType="java.lang.Long"
+            resultType="cn.les.ntfm.infoshare.entity.XmlTemplateDO">
+        SELECT ID,
+               PID,
+               LABEL_NAME,
+               DISPLAY_SEQ,
+               LABEL_TYPE,
+               VALUE,
+               CREATE_USER,
+               CREATE_TIME,
+               UPDATE_USER,
+               UPDATE_TIME
+        FROM XMLTEMPLATE
+        WHERE PID = #{pid}
+        ORDER BY DISPLAY_SEQ ASC
+    </select>
+
+    <!--已关联该模板的链路-->
+    <select id="listAffectedLinks" parameterType="java.lang.Long"
+            resultType="cn.les.ntfm.infoshare.entity.InfoshareConfigDO">
+        SELECT T1.ID, T1.INTERACTION_MARK, T1.COMPANY_NAME
+        FROM INFOSHARECONFIG T1
+        INNER JOIN DATABASECONFIG T2
+        ON T1.SOURCE_ID=T2.ID
+        WHERE
+         T2.XMLTEMPLATE_ID =
+        (SELECT ID FROM XMLTEMPLATE WHERE  PID IS NULL START WITH ID = ${id} CONNECT BY PRIOR PID=ID)
+    </select>
+</mapper>

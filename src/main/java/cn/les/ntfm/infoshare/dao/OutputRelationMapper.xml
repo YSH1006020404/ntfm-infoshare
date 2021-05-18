@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.OutputRelationMapper">
+    <insert id="addData" parameterType="cn.les.ntfm.infoshare.entity.OutputRelationDO">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="BEFORE">
+            SELECT (NVL(MAX(ID),0)+1) AS id FROM OUTPUTRELATION
+        </selectKey>
+        INSERT INTO OUTPUTRELATION (
+        ID,
+        COLUMN_NAME,
+        COLUMN_TYPE,
+        DATE_FORMAT,
+        EXPLAIN,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME)
+        VALUES (
+        #{id},
+        #{columnName},
+        #{columnType},
+        #{dateFormat},
+        #{explain},
+        'admin',
+        SYSDATE,
+        'admin',
+        SYSDATE)
+    </insert>
+
+    <update id="updateById" parameterType="cn.les.ntfm.infoshare.entity.OutputRelationDO">
+        UPDATE OUTPUTRELATION
+        <set>
+            COLUMN_NAME = #{columnName},
+            COLUMN_TYPE = #{columnType},
+            DATE_FORMAT = #{dateFormat},
+            EXPLAIN = #{explain},
+            UPDATE_USER = 'admin',
+            UPDATE_TIME = SYSDATE
+        </set>
+        WHERE ID = ${id}
+    </update>
+    <select id="getDataById" parameterType="java.lang.Long" resultType="cn.les.ntfm.infoshare.entity.OutputRelationDO">
+        SELECT ID,
+               COLUMN_NAME,
+               COLUMN_TYPE,
+               DATE_FORMAT,
+               EXPLAIN,
+               CREATE_USER,
+               CREATE_TIME,
+               UPDATE_USER,
+               UPDATE_TIME
+        FROM OUTPUTRELATION
+        WHERE ID = #{id}
+    </select>
+
+    <delete id="deleteDataById" parameterType="java.lang.Long">
+        DELETE FROM OUTPUTRELATION WHERE ID = #{id}
+    </delete>
+
+    <select id="listRelationTableData" resultType="cn.les.ntfm.infoshare.entity.OutputRelationDO">
+        SELECT T1.ID,
+        T1.COLUMN_NAME,
+        T1.COLUMN_TYPE,
+        T1.DATE_FORMAT,
+        T1.EXPLAIN,
+        T1.CREATE_USER,
+        T1.CREATE_TIME,
+        T1.UPDATE_USER,
+        T1.UPDATE_TIME
+        FROM OUTPUTRELATION T1
+        INNER JOIN (
+            SELECT * FROM XMLFORMATCONFIG
+            WHERE TABLE_ID = #{tableId}
+            START WITH ID = #{xmlFormatConfigId} CONNECT BY PRIOR ID = PID) T2
+        ON T1.ID = T2.OUTPUTRELATION_ID
+    </select>
+</mapper>

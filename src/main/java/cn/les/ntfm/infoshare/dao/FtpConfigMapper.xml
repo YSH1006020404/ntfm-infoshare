@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.les.ntfm.infoshare.dao.FtpConfigMapper">
+    <insert id="addData" parameterType="cn.les.ntfm.infoshare.entity.FtpConfigDO">
+        <selectKey resultType="java.lang.Long" keyProperty="id" order="BEFORE">
+            SELECT (NVL(MAX(ID),0)+1) AS id FROM FTPCONFIG
+        </selectKey>
+        INSERT INTO FTPCONFIG(
+        ID,
+        IP,
+        PATH,
+        PORT,
+        FILE_NAME_PREFIX,
+        USERNAME,
+        PASSWORD,
+        OBJECT_NAME,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME)
+        VALUES(
+        ${id},
+        #{ip},
+        #{path},
+        #{port},
+        #{fileNamePrefix},
+        #{username},
+        #{password},
+        #{fileNamePrefix},
+        'admin',
+        SYSDATE,
+        'admin',
+        SYSDATE)
+    </insert>
+
+    <update id="updateById" parameterType="cn.les.ntfm.infoshare.entity.FtpConfigDO">
+        UPDATE FTPCONFIG
+        <set>
+            IP = #{ip},
+            PATH = #{path},
+            PORT = #{port},
+            FILE_NAME_PREFIX = #{fileNamePrefix},
+            USERNAME = #{username},
+            PASSWORD = #{password},
+            OBJECT_NAME = #{fileNamePrefix},
+            UPDATE_USER = 'admin',
+            UPDATE_TIME = SYSDATE
+        </set>
+        WHERE ID = #{id}
+    </update>
+
+    <select id="getDataById" parameterType="java.lang.Long" resultType="cn.les.ntfm.infoshare.entity.FtpConfigDO">
+        SELECT
+        ID,
+        IP,
+        PATH,
+        PORT,
+        FILE_NAME_PREFIX,
+        USERNAME,
+        PASSWORD,
+        OBJECT_NAME,
+        CREATE_USER,
+        CREATE_TIME,
+        UPDATE_USER,
+        UPDATE_TIME
+        FROM FTPCONFIG WHERE ID=#{id}
+    </select>
+</mapper>
